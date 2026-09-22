@@ -1,1 +1,310 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MSM Ordreoversikt</title>
 
+<style>
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  background: #111318;
+  color: #1f2937;
+}
+
+.topbar {
+  background: #0a0b0e;
+  border-bottom: 4px solid #f5a623;
+  padding: 20px;
+}
+
+.topbar-inner {
+  max-width: 1100px;
+  margin: auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.brand {
+  color: white;
+  font-size: 25px;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+.brand span { color: #f5a623; }
+
+.brand-small {
+  color: #9ca3af;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.badge {
+  background: #20232a;
+  color: #d1d5db;
+  padding: 8px 12px;
+  border-radius: 7px;
+  font-size: 11px;
+  font-weight: bold;
+}
+
+.container {
+  max-width: 1100px;
+  margin: auto;
+  padding: 22px;
+}
+
+.page-head {
+  color: white;
+  margin-bottom: 20px;
+}
+
+.page-head h1 {
+  margin: 0;
+  font-size: 30px;
+}
+
+.page-head p {
+  color: #9ca3af;
+  margin: 6px 0 0;
+}
+
+.orders {
+  display: grid;
+  gap: 12px;
+}
+
+.order {
+  background: white;
+  border-radius: 12px;
+  padding: 18px;
+  display: grid;
+  grid-template-columns: 90px 1.6fr 1fr 1fr 160px;
+  align-items: center;
+  gap: 15px;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(0,0,0,.2);
+  transition: .12s;
+}
+
+.order:hover {
+  transform: translateY(-2px);
+}
+
+.order-no {
+  font-size: 23px;
+  font-weight: 800;
+}
+
+.customer {
+  font-size: 17px;
+  font-weight: bold;
+}
+
+.label {
+  display: block;
+  color: #6b7280;
+  font-size: 10px;
+  text-transform: uppercase;
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.value {
+  font-weight: bold;
+}
+
+.status {
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 800;
+  text-align: center;
+  background: #fff4df;
+  color: #704d08;
+  border-left: 4px solid #f5a623;
+}
+
+.status.done {
+  background: #e8f5ee;
+  color: #146c43;
+  border-left-color: #198754;
+}
+
+.empty, .error {
+  background: white;
+  border-radius: 12px;
+  padding: 25px;
+}
+
+.footer {
+  text-align: center;
+  color: #6b7280;
+  font-size: 11px;
+  padding: 25px;
+}
+
+@media (max-width: 750px) {
+  .container {
+    padding: 12px;
+  }
+
+  .badge {
+    display: none;
+  }
+
+  .order {
+    grid-template-columns: 70px 1fr;
+  }
+
+  .order .project,
+  .order .delivery,
+  .order .status-wrap {
+    grid-column: 2;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div>
+      <div class="brand"><span>MSM</span> PRODUKSJON</div>
+      <div class="brand-small">Martin Sveis og Mekaniske AS</div>
+    </div>
+
+    <div class="badge">ORDREOVERSIKT</div>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="page-head">
+    <h1>Produksjonsordre</h1>
+    <p>Aktive ordre sortert etter leveringsdato</p>
+  </div>
+
+  <div id="orders" class="orders">
+    <div class="empty">Laster ordre...</div>
+  </div>
+
+</div>
+
+<div class="footer">
+  MSM Produksjonssystem
+</div>
+
+<script>
+
+const functionUrl =
+  "https://xhhahusvvvsuaypqwcar.supabase.co/functions/v1/production-order";
+
+const orderPage =
+  "https://msm498.github.io/msm-production/";
+
+function formatDate(date) {
+  if (!date) return "-";
+
+  const parts = date.split("-");
+
+  if (parts.length !== 3) return date;
+
+  return `${parts[2]}.${parts[1]}.${parts[0]}`;
+}
+
+async function loadOrders() {
+
+  const container = document.getElementById("orders");
+
+  try {
+
+    const response = await fetch(
+      functionUrl + "?view=orders"
+    );
+
+    if (!response.ok) {
+      throw new Error("Kunne ikke hente ordre");
+    }
+
+    const orders = await response.json();
+
+    if (!Array.isArray(orders) || orders.length === 0) {
+      container.innerHTML =
+        '<div class="empty">Ingen aktive ordre.</div>';
+      return;
+    }
+
+    container.innerHTML = orders.map(order => {
+
+      const status =
+        order.production_status || "Ordre mottatt";
+
+      const statusClass =
+        status === "Ferdig" ? "status done" : "status";
+
+      const token =
+        encodeURIComponent(order.portal_token);
+
+      return `
+        <div class="order"
+             onclick="window.location.href='${orderPage}?token=${token}'">
+
+          <div class="order-no">
+            #${order.sales_order_no}
+          </div>
+
+          <div>
+            <span class="label">Kunde</span>
+            <div class="customer">
+              ${order.customer_name ?? "-"}
+            </div>
+          </div>
+
+          <div class="project">
+            <span class="label">Prosjekt</span>
+            <div class="value">
+              ${order.project_code ?? "-"}
+            </div>
+          </div>
+
+          <div class="delivery">
+            <span class="label">Levering</span>
+            <div class="value">
+              ${formatDate(order.delivery_date)}
+            </div>
+          </div>
+
+          <div class="status-wrap">
+            <span class="label">Status</span>
+            <div class="${statusClass}">
+              ${status}
+            </div>
+          </div>
+
+        </div>
+      `;
+    }).join("");
+
+  } catch (error) {
+
+    container.innerHTML =
+      '<div class="error">Kunne ikke hente ordreoversikten.</div>';
+
+  }
+}
+
+loadOrders();
+
+setInterval(loadOrders, 30000);
+
+</script>
+
+</body>
+</html>
