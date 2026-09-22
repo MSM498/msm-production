@@ -316,6 +316,69 @@ body {
   margin-bottom: 4px;
 }
 
+.history-list {
+  position: relative;
+}
+
+.history-item {
+  display: flex;
+  gap: 14px;
+  padding: 15px 0;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.history-item:last-child {
+  border-bottom: 0;
+}
+
+.history-marker {
+  width: 12px;
+  height: 12px;
+  min-width: 12px;
+  border-radius: 50%;
+  background: #f5a623;
+  margin-top: 5px;
+}
+
+.history-main {
+  flex: 1;
+}
+
+.history-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+  margin-bottom: 5px;
+}
+
+.history-employee {
+  font-weight: 800;
+}
+
+.history-time {
+  color: #6b7280;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.history-change {
+  color: #374151;
+  font-size: 14px;
+}
+
+.history-arrow {
+  color: #f5a623;
+  font-weight: bold;
+  padding: 0 5px;
+}
+
+.history-empty {
+  background: #f5f6f8;
+  color: #6b7280;
+  padding: 15px;
+  border-radius: 8px;
+}
+
 .message {
   display: none;
   padding: 15px;
@@ -329,13 +392,6 @@ body {
   background: #fff0f0;
   color: #a61b1b;
   border-left: 5px solid #dc3545;
-}
-
-.message.success {
-  display: block;
-  background: #e8f5ee;
-  color: #146c43;
-  border-left: 5px solid #198754;
 }
 
 .qr-wrap {
@@ -388,8 +444,17 @@ body {
   .qr-wrap { display: block; }
   .qr-wrap img { margin-bottom: 12px; }
 
-  .user-row {
+  .user-row,
+  .history-top {
     align-items: flex-start;
+  }
+
+  .history-top {
+    display: block;
+  }
+
+  .history-time {
+    margin-top: 3px;
   }
 }
 </style>
@@ -486,6 +551,24 @@ function formatDate(date) {
   return `${parts[2]}.${parts[1]}.${parts[0]}`;
 }
 
+function formatHistoryDate(value) {
+  if (!value) return "";
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+
+  return new Intl.DateTimeFormat("nb-NO", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit"
+  }).format(date);
+}
+
 function progressHTML(status) {
   const currentIndex = stages.indexOf(status);
 
@@ -536,7 +619,6 @@ function orderLinesHTML(lines) {
           <th>Enhet</th>
         </tr>
       </thead>
-
       <tbody>
         ${filtered.map(line => `
           <tr>
@@ -557,7 +639,6 @@ function photoRequirementHTML(photoStatus) {
 
   return `
     <div class="photo-requirements">
-
       <div class="requirement ${before ? "ok" : "missing"}">
         ${before
           ? "✓ Bilde før lakkering lagret"
@@ -569,7 +650,6 @@ function photoRequirementHTML(photoStatus) {
           ? "✓ Bilde etter lakkering lagret"
           : "⚠ Bilde etter lakkering mangler"}
       </div>
-
     </div>
   `;
 }
@@ -588,9 +668,7 @@ async function loadOrder() {
       functionUrl + "?token=" + encodeURIComponent(token)
     );
 
-    if (!response.ok) {
-      throw new Error();
-    }
+    if (!response.ok) throw new Error();
 
     const order = await response.json();
 
@@ -600,15 +678,10 @@ async function loadOrder() {
     const employee = getEmployeeName();
 
     content.innerHTML = `
-
       <div class="card user-card">
-
         <div class="user-row">
-
           <div>
-            <div class="user-label">
-              Innlogget operatør
-            </div>
+            <div class="user-label">Innlogget operatør</div>
 
             <div class="user-name">
               ${employee
@@ -620,19 +693,12 @@ async function loadOrder() {
           <button
             class="change-user"
             onclick="changeEmployee()">
-
-            ${employee
-              ? "Bytt bruker"
-              : "Velg navn"}
-
+            ${employee ? "Bytt bruker" : "Velg navn"}
           </button>
-
         </div>
-
       </div>
 
       <div class="card">
-
         <h1 class="order-title">
           Ordre #${escapeHtml(order.sales_order_no)}
         </h1>
@@ -642,7 +708,6 @@ async function loadOrder() {
         </div>
 
         <div class="info-grid">
-
           <div class="info-box">
             <span class="label">Prosjekt</span>
             <div class="value">
@@ -663,25 +728,16 @@ async function loadOrder() {
               ${escapeHtml(status)}
             </div>
           </div>
-
         </div>
-
       </div>
 
       <div class="card">
+        <h2 class="section-title">Produksjonsstatus</h2>
 
-        <h2 class="section-title">
-          Produksjonsstatus
-        </h2>
-
-        <div
-          id="statusMessage"
-          class="message">
-        </div>
+        <div id="statusMessage" class="message"></div>
 
         <div class="current-status">
-          Nåværende status:
-          ${escapeHtml(status)}
+          Nåværende status: ${escapeHtml(status)}
         </div>
 
         <div class="progress">
@@ -691,41 +747,39 @@ async function loadOrder() {
         <div class="status-buttons">
           ${statusButtonsHTML(status)}
         </div>
-
       </div>
 
       <div class="card">
+        <h2 class="section-title">Ordrelinjer</h2>
+        ${orderLinesHTML(order.order_lines)}
+      </div>
 
+      <div class="card">
         <h2 class="section-title">
-          Ordrelinjer
+          Produksjonshistorikk
         </h2>
 
-        ${orderLinesHTML(order.order_lines)}
-
+        <div id="history">
+          Laster historikk...
+        </div>
       </div>
 
       <div class="card">
-
         <h2 class="section-title">
           Lakkering – bildedokumentasjon
         </h2>
 
         <p class="photo-intro">
-          Både før- og etterbilde må være lagret før ordren
-          kan flyttes videre til Pakking eller Ferdig.
+          Både før- og etterbilde må være lagret før ordren kan
+          flyttes videre til Pakking eller Ferdig.
         </p>
 
         ${photoRequirementHTML(order.paint_photos)}
 
         <div class="photo-actions">
-
           <div class="photo-box">
-
             <h3>Før lakkering</h3>
-
-            <p>
-              Dokumenter varen før den lakkeres.
-            </p>
+            <p>Dokumenter varen før den lakkeres.</p>
 
             <input
               id="beforeFile"
@@ -738,20 +792,13 @@ async function loadOrder() {
             <button
               class="photo-button"
               onclick="selectPhoto('beforeFile')">
-
               📷 Ta bilde før lakkering
-
             </button>
-
           </div>
 
           <div class="photo-box">
-
             <h3>Etter lakkering</h3>
-
-            <p>
-              Dokumenter ferdig lakkert vare.
-            </p>
+            <p>Dokumenter ferdig lakkert vare.</p>
 
             <input
               id="afterFile"
@@ -764,13 +811,9 @@ async function loadOrder() {
             <button
               class="photo-button after"
               onclick="selectPhoto('afterFile')">
-
               📷 Ta bilde etter lakkering
-
             </button>
-
           </div>
-
         </div>
 
         <div
@@ -782,46 +825,32 @@ async function loadOrder() {
           <strong>Lagrede bilder</strong>
         </div>
 
-        <div
-          id="gallery"
-          class="gallery">
-
+        <div id="gallery" class="gallery">
           Laster bilder...
-
         </div>
-
       </div>
 
       <div class="card">
-
-        <h2 class="section-title">
-          QR-kode
-        </h2>
+        <h2 class="section-title">QR-kode</h2>
 
         <div class="qr-wrap">
-
           <img
             src="https://quickchart.io/qr?size=220&text=${encodeURIComponent(window.location.href)}"
             alt="QR-kode">
 
           <div class="qr-text">
-
-            <strong>
-              Scan med mobilkamera
-            </strong>
+            <strong>Scan med mobilkamera</strong>
 
             <p>
               QR-koden åpner denne produksjonsordren direkte.
               Den kan skrives ut og følge varen gjennom produksjonen.
             </p>
-
           </div>
-
         </div>
-
       </div>
     `;
 
+    loadHistory();
     loadImages();
 
   } catch {
@@ -829,6 +858,74 @@ async function loadOrder() {
       `<div class="error-card">
         Kunne ikke hente produksjonsordren.
       </div>`;
+  }
+}
+
+async function loadHistory() {
+  const historyBox =
+    document.getElementById("history");
+
+  if (!historyBox) return;
+
+  try {
+    const response = await fetch(
+      functionUrl +
+      "?token=" +
+      encodeURIComponent(token) +
+      "&action=history"
+    );
+
+    if (!response.ok) throw new Error();
+
+    const history = await response.json();
+
+    if (!Array.isArray(history) || !history.length) {
+      historyBox.innerHTML = `
+        <div class="history-empty">
+          Ingen statusendringer er registrert ennå.
+        </div>
+      `;
+      return;
+    }
+
+    historyBox.innerHTML = `
+      <div class="history-list">
+        ${history.map(item => `
+          <div class="history-item">
+
+            <div class="history-marker"></div>
+
+            <div class="history-main">
+
+              <div class="history-top">
+                <div class="history-employee">
+                  ${escapeHtml(item.employee_name || "Ukjent operatør")}
+                </div>
+
+                <div class="history-time">
+                  ${escapeHtml(formatHistoryDate(item.created_at))}
+                </div>
+              </div>
+
+              <div class="history-change">
+                ${escapeHtml(item.previous_status || "-")}
+                <span class="history-arrow">→</span>
+                ${escapeHtml(item.status || "-")}
+              </div>
+
+            </div>
+
+          </div>
+        `).join("")}
+      </div>
+    `;
+
+  } catch {
+    historyBox.innerHTML = `
+      <div class="history-empty">
+        Kunne ikke hente produksjonshistorikken.
+      </div>
+    `;
   }
 }
 
@@ -855,8 +952,6 @@ async function updateStatus(status) {
     message.className = "message error";
     message.textContent =
       "⚠ Velg operatør før status endres.";
-
-    loadOrder();
     return;
   }
 
@@ -911,8 +1006,7 @@ async function updateStatus(status) {
 }
 
 async function uploadImage(imageType, input) {
-  const file =
-    input.files?.[0];
+  const file = input.files?.[0];
 
   const statusBox =
     document.getElementById("uploadStatus");
@@ -934,28 +1028,12 @@ async function uploadImage(imageType, input) {
     "Laster opp bilde...";
 
   try {
-    const formData =
-      new FormData();
+    const formData = new FormData();
 
-    formData.append(
-      "file",
-      file
-    );
-
-    formData.append(
-      "stage",
-      "Lakkering"
-    );
-
-    formData.append(
-      "image_type",
-      imageType
-    );
-
-    formData.append(
-      "uploaded_by",
-      employee
-    );
+    formData.append("file", file);
+    formData.append("stage", "Lakkering");
+    formData.append("image_type", imageType);
+    formData.append("uploaded_by", employee);
 
     const response = await fetch(
       functionUrl +
@@ -969,9 +1047,7 @@ async function uploadImage(imageType, input) {
     );
 
     if (!response.ok) {
-      throw new Error(
-        await response.text()
-      );
+      throw new Error(await response.text());
     }
 
     input.value = "";
@@ -1000,20 +1076,13 @@ async function loadImages() {
       "&action=images"
     );
 
-    if (!response.ok) {
-      throw new Error();
-    }
+    if (!response.ok) throw new Error();
 
-    const images =
-      await response.json();
+    const images = await response.json();
 
-    if (
-      !Array.isArray(images) ||
-      !images.length
-    ) {
+    if (!Array.isArray(images) || !images.length) {
       gallery.innerHTML =
         `<div>Ingen bilder lagret ennå.</div>`;
-
       return;
     }
 
@@ -1028,17 +1097,12 @@ async function loadImages() {
         if (!image.image_url) {
           return `
             <div class="image-card">
-
               <div class="image-info">
-
                 <div class="image-type">
                   ${typeText}
                 </div>
-
                 Bildet kunne ikke vises.
-
               </div>
-
             </div>
           `;
         }
