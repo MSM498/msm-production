@@ -99,9 +99,7 @@ body {
   margin-bottom: 5px;
 }
 
-.value {
-  font-weight: bold;
-}
+.value { font-weight: bold; }
 
 .section-title {
   margin: 0 0 15px;
@@ -182,6 +180,31 @@ body {
   margin-top: -5px;
 }
 
+.photo-requirements {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 15px 0;
+}
+
+.requirement {
+  padding: 12px;
+  border-radius: 8px;
+  font-weight: bold;
+}
+
+.requirement.ok {
+  background: #e8f5ee;
+  color: #146c43;
+  border-left: 4px solid #198754;
+}
+
+.requirement.missing {
+  background: #fff0f0;
+  color: #a61b1b;
+  border-left: 4px solid #dc3545;
+}
+
 .photo-actions {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -206,9 +229,7 @@ body {
 }
 
 .photo-button {
-  display: inline-block;
   width: 100%;
-  text-align: center;
   border: 0;
   background: #20232a;
   color: white;
@@ -218,19 +239,9 @@ body {
   cursor: pointer;
 }
 
-.photo-button:hover {
-  background: #f5a623;
-  color: #111;
-}
-
 .photo-button.after {
   background: #f5a623;
   color: #111;
-}
-
-.photo-button:disabled {
-  opacity: .55;
-  cursor: wait;
 }
 
 .upload-status {
@@ -273,6 +284,28 @@ body {
   font-size: 13px;
 }
 
+.message {
+  display: none;
+  padding: 15px;
+  border-radius: 8px;
+  margin: 15px 0;
+  font-weight: bold;
+}
+
+.message.error {
+  display: block;
+  background: #fff0f0;
+  color: #a61b1b;
+  border-left: 5px solid #dc3545;
+}
+
+.message.success {
+  display: block;
+  background: #e8f5ee;
+  color: #146c43;
+  border-left: 5px solid #198754;
+}
+
 .qr-wrap {
   display: flex;
   gap: 25px;
@@ -289,7 +322,7 @@ body {
   max-width: 400px;
 }
 
-.error {
+.error-card {
   background: white;
   border-radius: 12px;
   padding: 25px;
@@ -307,7 +340,8 @@ body {
   .badge { display: none; }
 
   .info-grid,
-  .photo-actions {
+  .photo-actions,
+  .photo-requirements {
     grid-template-columns: 1fr;
   }
 
@@ -342,7 +376,6 @@ body {
       <div class="brand"><span>MSM</span> PRODUKSJON</div>
       <div class="brand-small">Martin Sveis og Mekaniske AS</div>
     </div>
-
     <div class="badge">PRODUKSJONSORDRE</div>
   </div>
 </div>
@@ -351,9 +384,7 @@ body {
   <div class="card">Laster ordre...</div>
 </div>
 
-<div class="footer">
-  MSM Produksjonssystem
-</div>
+<div class="footer">MSM Produksjonssystem</div>
 
 <script>
 const functionUrl =
@@ -372,8 +403,6 @@ const stages = [
 const params = new URLSearchParams(window.location.search);
 const token = params.get("token");
 
-let currentOrder = null;
-
 function escapeHtml(value) {
   return String(value ?? "")
     .replaceAll("&", "&amp;")
@@ -385,10 +414,8 @@ function escapeHtml(value) {
 
 function formatDate(date) {
   if (!date) return "-";
-
   const parts = date.split("-");
   if (parts.length !== 3) return date;
-
   return `${parts[2]}.${parts[1]}.${parts[0]}`;
 }
 
@@ -397,7 +424,6 @@ function progressHTML(status) {
 
   return stages.map((stage, index) => {
     let cls = "progress-step";
-
     if (index < currentIndex) cls += " done";
     if (index === currentIndex) cls += " current";
 
@@ -410,8 +436,7 @@ function statusButtonsHTML(status) {
     const active = stage === status ? " active" : "";
 
     return `
-      <button
-        class="status-button${active}"
+      <button class="status-button${active}"
         onclick="updateStatus('${stage}')">
         ${escapeHtml(stage)}
       </button>
@@ -428,7 +453,7 @@ function orderLinesHTML(lines) {
       )
     : [];
 
-  if (filtered.length === 0) {
+  if (!filtered.length) {
     return `<p>Ingen ordrelinjer registrert.</p>`;
   }
 
@@ -442,7 +467,6 @@ function orderLinesHTML(lines) {
           <th>Enhet</th>
         </tr>
       </thead>
-
       <tbody>
         ${filtered.map(line => `
           <tr>
@@ -457,12 +481,33 @@ function orderLinesHTML(lines) {
   `;
 }
 
+function photoRequirementHTML(photoStatus) {
+  const before = photoStatus?.has_before;
+  const after = photoStatus?.has_after;
+
+  return `
+    <div class="photo-requirements">
+      <div class="requirement ${before ? "ok" : "missing"}">
+        ${before
+          ? "✓ Bilde før lakkering lagret"
+          : "⚠ Bilde før lakkering mangler"}
+      </div>
+
+      <div class="requirement ${after ? "ok" : "missing"}">
+        ${after
+          ? "✓ Bilde etter lakkering lagret"
+          : "⚠ Bilde etter lakkering mangler"}
+      </div>
+    </div>
+  `;
+}
+
 async function loadOrder() {
   const content = document.getElementById("content");
 
   if (!token) {
     content.innerHTML =
-      `<div class="error">Mangler ordre-token i lenken.</div>`;
+      `<div class="error-card">Mangler ordre-token i lenken.</div>`;
     return;
   }
 
@@ -471,13 +516,9 @@ async function loadOrder() {
       functionUrl + "?token=" + encodeURIComponent(token)
     );
 
-    if (!response.ok) {
-      throw new Error("Ordren kunne ikke hentes");
-    }
+    if (!response.ok) throw new Error();
 
     const order = await response.json();
-    currentOrder = order;
-
     const status = order.production_status || "Ordre mottatt";
 
     content.innerHTML = `
@@ -493,29 +534,25 @@ async function loadOrder() {
         <div class="info-grid">
           <div class="info-box">
             <span class="label">Prosjekt</span>
-            <div class="value">
-              ${escapeHtml(order.project_code || "-")}
-            </div>
+            <div class="value">${escapeHtml(order.project_code || "-")}</div>
           </div>
 
           <div class="info-box">
             <span class="label">Leveringsdato</span>
-            <div class="value">
-              ${formatDate(order.delivery_date)}
-            </div>
+            <div class="value">${formatDate(order.delivery_date)}</div>
           </div>
 
           <div class="info-box">
             <span class="label">Produksjonsstatus</span>
-            <div class="value">
-              ${escapeHtml(status)}
-            </div>
+            <div class="value">${escapeHtml(status)}</div>
           </div>
         </div>
       </div>
 
       <div class="card">
         <h2 class="section-title">Produksjonsstatus</h2>
+
+        <div id="statusMessage" class="message"></div>
 
         <div class="current-status">
           Nåværende status: ${escapeHtml(status)}
@@ -539,27 +576,25 @@ async function loadOrder() {
         <h2 class="section-title">Lakkering – bildedokumentasjon</h2>
 
         <p class="photo-intro">
-          Ta bilde av varen før og etter lakkering.
-          Bildene lagres på denne produksjonsordren.
+          Både før- og etterbilde må være lagret før ordren kan
+          flyttes videre til Pakking eller Ferdig.
         </p>
 
-        <div class="photo-actions">
+        ${photoRequirementHTML(order.paint_photos)}
 
+        <div class="photo-actions">
           <div class="photo-box">
             <h3>Før lakkering</h3>
             <p>Dokumenter varen før den lakkeres.</p>
 
-            <input
-              id="beforeFile"
+            <input id="beforeFile"
               type="file"
               accept="image/*"
               capture="environment"
               hidden
-              onchange="uploadImage('before', this)"
-            >
+              onchange="uploadImage('before', this)">
 
-            <button
-              class="photo-button"
+            <button class="photo-button"
               onclick="document.getElementById('beforeFile').click()">
               📷 Ta bilde før lakkering
             </button>
@@ -569,22 +604,18 @@ async function loadOrder() {
             <h3>Etter lakkering</h3>
             <p>Dokumenter ferdig lakkert vare.</p>
 
-            <input
-              id="afterFile"
+            <input id="afterFile"
               type="file"
               accept="image/*"
               capture="environment"
               hidden
-              onchange="uploadImage('after', this)"
-            >
+              onchange="uploadImage('after', this)">
 
-            <button
-              class="photo-button after"
+            <button class="photo-button after"
               onclick="document.getElementById('afterFile').click()">
               📷 Ta bilde etter lakkering
             </button>
           </div>
-
         </div>
 
         <div id="uploadStatus" class="upload-status"></div>
@@ -604,8 +635,7 @@ async function loadOrder() {
         <div class="qr-wrap">
           <img
             src="https://quickchart.io/qr?size=220&text=${encodeURIComponent(window.location.href)}"
-            alt="QR-kode for ordre"
-          >
+            alt="QR-kode">
 
           <div class="qr-text">
             <strong>Scan med mobilkamera</strong>
@@ -620,33 +650,44 @@ async function loadOrder() {
 
     loadImages();
 
-  } catch (error) {
+  } catch {
     content.innerHTML =
-      `<div class="error">Kunne ikke hente produksjonsordren.</div>`;
+      `<div class="error-card">Kunne ikke hente produksjonsordren.</div>`;
   }
 }
 
 async function updateStatus(status) {
+  const message = document.getElementById("statusMessage");
+
   try {
     const response = await fetch(
       functionUrl + "?token=" + encodeURIComponent(token),
       {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status })
       }
     );
 
     if (!response.ok) {
-      throw new Error("Status kunne ikke oppdateres");
+      let errorText = "Kunne ikke oppdatere produksjonsstatus.";
+
+      try {
+        const data = await response.json();
+        if (data.error) errorText = data.error;
+      } catch {}
+
+      message.className = "message error";
+      message.textContent = "⚠ " + errorText;
+      return;
     }
 
     await loadOrder();
 
-  } catch (error) {
-    alert("Kunne ikke oppdatere produksjonsstatus.");
+  } catch {
+    message.className = "message error";
+    message.textContent =
+      "⚠ Kunne ikke oppdatere produksjonsstatus.";
   }
 }
 
@@ -668,9 +709,8 @@ async function uploadImage(imageType, input) {
 
     const response = await fetch(
       functionUrl +
-        "?token=" +
-        encodeURIComponent(token) +
-        "&action=upload-image",
+      "?token=" + encodeURIComponent(token) +
+      "&action=upload-image",
       {
         method: "POST",
         body: formData
@@ -678,8 +718,7 @@ async function uploadImage(imageType, input) {
     );
 
     if (!response.ok) {
-      const message = await response.text();
-      throw new Error(message);
+      throw new Error(await response.text());
     }
 
     statusBox.textContent =
@@ -689,37 +728,31 @@ async function uploadImage(imageType, input) {
 
     input.value = "";
 
-    await loadImages();
+    await loadOrder();
 
   } catch (error) {
     console.error(error);
-    statusBox.textContent =
-      "Kunne ikke laste opp bildet.";
+    statusBox.textContent = "Kunne ikke laste opp bildet.";
   }
 }
 
 async function loadImages() {
   const gallery = document.getElementById("gallery");
-
   if (!gallery) return;
 
   try {
     const response = await fetch(
       functionUrl +
-        "?token=" +
-        encodeURIComponent(token) +
-        "&action=images"
+      "?token=" + encodeURIComponent(token) +
+      "&action=images"
     );
 
-    if (!response.ok) {
-      throw new Error("Kunne ikke hente bilder");
-    }
+    if (!response.ok) throw new Error();
 
     const images = await response.json();
 
-    if (!Array.isArray(images) || images.length === 0) {
-      gallery.innerHTML =
-        `<div>Ingen bilder lagret ennå.</div>`;
+    if (!Array.isArray(images) || !images.length) {
+      gallery.innerHTML = `<div>Ingen bilder lagret ennå.</div>`;
       return;
     }
 
@@ -742,27 +775,18 @@ async function loadImages() {
 
       return `
         <div class="image-card">
-          <img
-            src="${image.image_url}"
-            alt="${typeText}"
-          >
+          <img src="${image.image_url}" alt="${typeText}">
 
           <div class="image-info">
-            <div class="image-type">
-              ${typeText}
-            </div>
-
+            <div class="image-type">${typeText}</div>
             ${escapeHtml(image.stage || "")}
           </div>
         </div>
       `;
     }).join("");
 
-  } catch (error) {
-    console.error(error);
-
-    gallery.innerHTML =
-      `<div>Kunne ikke hente bilder.</div>`;
+  } catch {
+    gallery.innerHTML = `<div>Kunne ikke hente bilder.</div>`;
   }
 }
 
