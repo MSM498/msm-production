@@ -67,6 +67,41 @@ body {
   box-shadow: 0 4px 15px rgba(0,0,0,.2);
 }
 
+.user-card {
+  background: #20232a;
+  color: white;
+}
+
+.user-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+}
+
+.user-label {
+  color: #9ca3af;
+  font-size: 11px;
+  text-transform: uppercase;
+  font-weight: bold;
+}
+
+.user-name {
+  font-size: 20px;
+  font-weight: 800;
+  margin-top: 4px;
+}
+
+.change-user {
+  border: 1px solid #4b5563;
+  background: transparent;
+  color: white;
+  padding: 9px 13px;
+  border-radius: 7px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
 .order-title {
   margin: 0 0 5px;
   font-size: 30px;
@@ -147,11 +182,7 @@ body {
   font-weight: bold;
 }
 
-.status-button:hover {
-  background: #f5a623;
-  color: #111;
-}
-
+.status-button:hover,
 .status-button.active {
   background: #f5a623;
   color: #111;
@@ -218,9 +249,7 @@ body {
   padding: 16px;
 }
 
-.photo-box h3 {
-  margin: 0 0 6px;
-}
+.photo-box h3 { margin: 0 0 6px; }
 
 .photo-box p {
   color: #6b7280;
@@ -277,11 +306,14 @@ body {
 .image-info {
   padding: 10px;
   font-size: 12px;
+  color: #6b7280;
 }
 
 .image-type {
   font-weight: bold;
   font-size: 13px;
+  color: #1f2937;
+  margin-bottom: 4px;
 }
 
 .message {
@@ -297,13 +329,6 @@ body {
   background: #fff0f0;
   color: #a61b1b;
   border-left: 5px solid #dc3545;
-}
-
-.message.success {
-  display: block;
-  background: #e8f5ee;
-  color: #146c43;
-  border-left: 5px solid #198754;
 }
 
 .qr-wrap {
@@ -353,16 +378,11 @@ body {
     grid-template-columns: 1fr;
   }
 
-  .qr-wrap {
-    display: block;
-  }
+  .qr-wrap { display: block; }
+  .qr-wrap img { margin-bottom: 12px; }
 
-  .qr-wrap img {
-    margin-bottom: 12px;
-  }
-
-  .lines {
-    font-size: 12px;
+  .user-row {
+    align-items: flex-start;
   }
 }
 </style>
@@ -412,6 +432,43 @@ function escapeHtml(value) {
     .replaceAll("'", "&#039;");
 }
 
+function getEmployeeName() {
+  return localStorage.getItem("msm_employee_name") || "";
+}
+
+function ensureEmployeeName() {
+  let name = getEmployeeName();
+
+  if (!name) {
+    name = prompt("Hvem bruker mobilen? Skriv navnet ditt:");
+
+    if (name && name.trim()) {
+      name = name.trim();
+      localStorage.setItem("msm_employee_name", name);
+    }
+  }
+
+  return getEmployeeName();
+}
+
+function changeEmployee() {
+  const current = getEmployeeName();
+
+  const name = prompt(
+    "Skriv navnet på den som bruker mobilen:",
+    current
+  );
+
+  if (name && name.trim()) {
+    localStorage.setItem(
+      "msm_employee_name",
+      name.trim()
+    );
+
+    loadOrder();
+  }
+}
+
 function formatDate(date) {
   if (!date) return "-";
   const parts = date.split("-");
@@ -426,8 +483,7 @@ function progressHTML(status) {
     let cls = "progress-step";
     if (index < currentIndex) cls += " done";
     if (index === currentIndex) cls += " current";
-
-    return `<div class="${cls}" title="${escapeHtml(stage)}"></div>`;
+    return `<div class="${cls}"></div>`;
   }).join("");
 }
 
@@ -520,8 +576,26 @@ async function loadOrder() {
 
     const order = await response.json();
     const status = order.production_status || "Ordre mottatt";
+    const employee = getEmployeeName();
 
     content.innerHTML = `
+      <div class="card user-card">
+        <div class="user-row">
+          <div>
+            <div class="user-label">Innlogget operatør</div>
+            <div class="user-name">
+              ${employee
+                ? escapeHtml(employee)
+                : "Ikke valgt"}
+            </div>
+          </div>
+
+          <button class="change-user" onclick="changeEmployee()">
+            ${employee ? "Bytt bruker" : "Velg navn"}
+          </button>
+        </div>
+      </div>
+
       <div class="card">
         <h1 class="order-title">
           Ordre #${escapeHtml(order.sales_order_no)}
@@ -573,7 +647,9 @@ async function loadOrder() {
       </div>
 
       <div class="card">
-        <h2 class="section-title">Lakkering – bildedokumentasjon</h2>
+        <h2 class="section-title">
+          Lakkering – bildedokumentasjon
+        </h2>
 
         <p class="photo-intro">
           Både før- og etterbilde må være lagret før ordren kan
@@ -595,7 +671,7 @@ async function loadOrder() {
               onchange="uploadImage('before', this)">
 
             <button class="photo-button"
-              onclick="document.getElementById('beforeFile').click()">
+              onclick="selectPhoto('beforeFile')">
               📷 Ta bilde før lakkering
             </button>
           </div>
@@ -612,7 +688,7 @@ async function loadOrder() {
               onchange="uploadImage('after', this)">
 
             <button class="photo-button after"
-              onclick="document.getElementById('afterFile').click()">
+              onclick="selectPhoto('afterFile')">
               📷 Ta bilde etter lakkering
             </button>
           </div>
@@ -656,6 +732,18 @@ async function loadOrder() {
   }
 }
 
+function selectPhoto(inputId) {
+  const employee = ensureEmployeeName();
+
+  if (!employee) {
+    alert("Velg navn før du tar bilde.");
+    loadOrder();
+    return;
+  }
+
+  document.getElementById(inputId).click();
+}
+
 async function updateStatus(status) {
   const message = document.getElementById("statusMessage");
 
@@ -697,6 +785,15 @@ async function uploadImage(imageType, input) {
 
   if (!file) return;
 
+  const employee = ensureEmployeeName();
+
+  if (!employee) {
+    statusBox.textContent =
+      "Velg navn før bildet kan lagres.";
+    input.value = "";
+    return;
+  }
+
   statusBox.textContent = "Laster opp bilde...";
 
   try {
@@ -705,7 +802,7 @@ async function uploadImage(imageType, input) {
     formData.append("file", file);
     formData.append("stage", "Lakkering");
     formData.append("image_type", imageType);
-    formData.append("uploaded_by", "");
+    formData.append("uploaded_by", employee);
 
     const response = await fetch(
       functionUrl +
@@ -721,18 +818,14 @@ async function uploadImage(imageType, input) {
       throw new Error(await response.text());
     }
 
-    statusBox.textContent =
-      imageType === "before"
-        ? "✓ Bilde før lakkering er lagret."
-        : "✓ Bilde etter lakkering er lagret.";
-
     input.value = "";
 
     await loadOrder();
 
   } catch (error) {
     console.error(error);
-    statusBox.textContent = "Kunne ikke laste opp bildet.";
+    statusBox.textContent =
+      "Kunne ikke laste opp bildet.";
   }
 }
 
@@ -752,7 +845,8 @@ async function loadImages() {
     const images = await response.json();
 
     if (!Array.isArray(images) || !images.length) {
-      gallery.innerHTML = `<div>Ingen bilder lagret ennå.</div>`;
+      gallery.innerHTML =
+        `<div>Ingen bilder lagret ennå.</div>`;
       return;
     }
 
@@ -780,13 +874,17 @@ async function loadImages() {
           <div class="image-info">
             <div class="image-type">${typeText}</div>
             ${escapeHtml(image.stage || "")}
+            ${image.uploaded_by
+              ? `<br>📷 ${escapeHtml(image.uploaded_by)}`
+              : ""}
           </div>
         </div>
       `;
     }).join("");
 
   } catch {
-    gallery.innerHTML = `<div>Kunne ikke hente bilder.</div>`;
+    gallery.innerHTML =
+      `<div>Kunne ikke hente bilder.</div>`;
   }
 }
 
