@@ -87,7 +87,27 @@
       background: #fff;
       padding: 20px;
       border-radius: 14px;
-    }
+    }.status-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.status-buttons button {
+  border: 0;
+  border-radius: 10px;
+  padding: 16px 8px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  background: #1f2937;
+  color: white;
+}
+
+.status-buttons button:active {
+  transform: scale(0.98);
+}
   </style>
 </head>
 
@@ -175,7 +195,14 @@ async function loadOrder() {
         <div class="status">
           ${order.production_status ?? "Ordre mottatt"}
         </div>
-
+<div class="status-buttons">
+  <button onclick="updateStatus('Laserskjæring')">Laserskjæring</button>
+  <button onclick="updateStatus('Knekking')">Knekking</button>
+  <button onclick="updateStatus('Sveising')">Sveising</button>
+  <button onclick="updateStatus('Lakkering')">Lakkering</button>
+  <button onclick="updateStatus('Pakking')">Pakking</button>
+  <button onclick="updateStatus('Ferdig')">Ferdig</button>
+</div>
       </div>
 
       <div class="card">
@@ -194,7 +221,29 @@ async function loadOrder() {
 
   }
 }
+async function updateStatus(status) {
+  try {
+    const response = await fetch(
+      functionUrl + "?token=" + encodeURIComponent(token),
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ status: status })
+      }
+    );
 
+    if (!response.ok) {
+      throw new Error("Kunne ikke oppdatere status");
+    }
+
+    await loadOrder();
+
+  } catch (error) {
+    alert("Kunne ikke oppdatere status.");
+  }
+}
 loadOrder();
 
 </script>
