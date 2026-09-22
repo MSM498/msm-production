@@ -1,141 +1,369 @@
 <!DOCTYPE html>
 <html lang="no">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MSM Produksjon</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MSM Produksjon</title>
 
-  <style>
-    * { box-sizing: border-box; }
+<style>
+* {
+  box-sizing: border-box;
+}
 
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      background: #f3f4f6;
-      color: #1f2937;
-    }
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  background: #111318;
+  color: #1f2937;
+}
 
-    .container {
-      max-width: 650px;
-      margin: auto;
-      padding: 18px;
-    }
+.topbar {
+  background: #0a0b0e;
+  border-bottom: 4px solid #f5a623;
+  padding: 20px;
+}
 
-    .header {
-      margin: 10px 0 20px;
-    }
+.topbar-inner {
+  max-width: 700px;
+  margin: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
 
-    .header h1 {
-      margin: 0;
-      font-size: 26px;
-    }
+.brand {
+  color: white;
+  font-size: 25px;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
 
-    .header p {
-      margin: 5px 0 0;
-      color: #6b7280;
-    }
+.brand span {
+  color: #f5a623;
+}
 
-    .card {
-      background: white;
-      border-radius: 14px;
-      padding: 20px;
-      margin-bottom: 15px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    }
+.brand-small {
+  color: #9ca3af;
+  font-size: 12px;
+  margin-top: 4px;
+}
 
-    .label {
-      color: #6b7280;
-      font-size: 13px;
-      margin-top: 16px;
-    }
+.system-badge {
+  background: #20232a;
+  color: #d1d5db;
+  padding: 7px 10px;
+  border-radius: 7px;
+  font-size: 11px;
+  font-weight: bold;
+}
 
-    .value {
-      font-size: 18px;
-      font-weight: 600;
-      margin-top: 3px;
-    }
+.container {
+  max-width: 700px;
+  margin: auto;
+  padding: 18px;
+}
 
-    .status {
-      margin-top: 8px;
-      padding: 15px;
-      background: #e5e7eb;
-      border-radius: 10px;
-      font-size: 21px;
-      font-weight: bold;
-    }
+.card {
+  background: white;
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 15px;
+  box-shadow: 0 5px 20px rgba(0,0,0,.22);
+}
 
-    .line {
-      padding: 14px 0;
-      border-bottom: 1px solid #e5e7eb;
-    }
+.order-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 15px;
+}
 
-    .line:last-child {
-      border-bottom: none;
-    }
+.order-number-small {
+  font-size: 12px;
+  text-transform: uppercase;
+  color: #6b7280;
+  font-weight: bold;
+  letter-spacing: .8px;
+}
 
-    .line-title {
-      font-weight: bold;
-      font-size: 17px;
-    }
+.order-number {
+  margin: 3px 0 0;
+  font-size: 32px;
+  color: #111827;
+}
 
-    .line-info {
-      color: #6b7280;
-      margin-top: 4px;
-    }
+.customer {
+  font-size: 20px;
+  font-weight: bold;
+  margin-top: 14px;
+}
 
-    .error {
-      background: #fff;
-      padding: 20px;
-      border-radius: 14px;
-    }.status-buttons {
+.details {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.detail {
+  background: #f3f4f6;
+  border-radius: 9px;
+  padding: 12px;
+}
+
+.label {
+  color: #6b7280;
+  font-size: 11px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.value {
+  font-size: 17px;
+  font-weight: bold;
+  margin-top: 4px;
+}
+
+.section-title {
+  margin: 0 0 15px;
+  font-size: 18px;
+}
+
+.current-status {
+  background: #fff4df;
+  border-left: 5px solid #f5a623;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 18px;
+}
+
+.current-status-label {
+  font-size: 11px;
+  color: #7c5a17;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.current-status-value {
+  font-size: 23px;
+  font-weight: 800;
+  margin-top: 3px;
+  color: #33250b;
+}
+
+.progress {
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+  margin: 24px 5px 28px;
+}
+
+.progress:before {
+  content: "";
+  position: absolute;
+  top: 13px;
+  left: 3%;
+  right: 3%;
+  height: 4px;
+  background: #e5e7eb;
+}
+
+.step {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  width: 14%;
+}
+
+.dot {
+  width: 29px;
+  height: 29px;
+  margin: auto;
+  border-radius: 50%;
+  background: #e5e7eb;
+  border: 4px solid white;
+  box-shadow: 0 0 0 2px #d1d5db;
+}
+
+.step.active .dot {
+  background: #f5a623;
+  box-shadow: 0 0 0 2px #f5a623;
+}
+
+.step.done .dot {
+  background: #198754;
+  box-shadow: 0 0 0 2px #198754;
+}
+
+.step-name {
+  font-size: 9px;
+  font-weight: bold;
+  margin-top: 8px;
+  color: #6b7280;
+}
+
+.status-buttons {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
-  margin-top: 16px;
 }
 
 .status-buttons button {
   border: 0;
   border-radius: 10px;
-  padding: 16px 8px;
-  font-size: 16px;
+  padding: 17px 8px;
+  font-size: 15px;
   font-weight: bold;
   cursor: pointer;
-  background: #1f2937;
+  background: #20232a;
   color: white;
+  transition: .1s;
+}
+
+.status-buttons button:hover {
+  background: #30343c;
 }
 
 .status-buttons button:active {
-  transform: scale(0.98);
+  transform: scale(.97);
 }
-  </style>
+
+.status-buttons .finish {
+  background: #198754;
+}
+
+.status-buttons .finish:hover {
+  background: #157347;
+}
+
+.line {
+  padding: 15px 0;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+}
+
+.line:last-child {
+  border-bottom: 0;
+}
+
+.line-title {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.line-info {
+  color: #6b7280;
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+.error {
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+}
+
+.footer {
+  text-align: center;
+  color: #6b7280;
+  font-size: 11px;
+  padding: 10px 0 30px;
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 12px;
+  }
+
+  .topbar {
+    padding: 15px 12px;
+  }
+
+  .brand {
+    font-size: 21px;
+  }
+
+  .system-badge {
+    display: none;
+  }
+
+  .step-name {
+    font-size: 8px;
+  }
+}
+</style>
 </head>
 
 <body>
 
+<div class="topbar">
+  <div class="topbar-inner">
+    <div>
+      <div class="brand"><span>MSM</span> PRODUKSJON</div>
+      <div class="brand-small">Martin Sveis og Mekaniske AS</div>
+    </div>
+    <div class="system-badge">PRODUKSJONSSYSTEM</div>
+  </div>
+</div>
+
 <div class="container">
-
-  <div class="header">
-    <h1>MSM Produksjon</h1>
-    <p>Martin Sveis og Mekaniske AS</p>
-  </div>
-
   <div id="content">
-    Laster ordre...
+    <div class="card">Laster ordre...</div>
   </div>
 
+  <div class="footer">
+    Martin Sveis og Mekaniske AS
+  </div>
 </div>
 
 <script>
-
 const params = new URLSearchParams(window.location.search);
 const token = params.get("token");
 
 const functionUrl =
   "https://xhhahusvvvsuaypqwcar.supabase.co/functions/v1/production-order";
 
-async function loadOrder() {
+const stages = [
+  "Ordre mottatt",
+  "Laserskjæring",
+  "Knekking",
+  "Sveising",
+  "Lakkering",
+  "Pakking",
+  "Ferdig"
+];
 
+function progressHTML(currentStatus) {
+  const currentIndex = stages.indexOf(currentStatus);
+
+  const shortNames = [
+    "Mottatt",
+    "Laser",
+    "Knekk",
+    "Sveis",
+    "Lakk",
+    "Pakk",
+    "Ferdig"
+  ];
+
+  return stages.map((stage, index) => {
+    let state = "";
+
+    if (index < currentIndex) state = "done";
+    if (index === currentIndex) state = "active";
+
+    return `
+      <div class="step ${state}">
+        <div class="dot"></div>
+        <div class="step-name">${shortNames[index]}</div>
+      </div>
+    `;
+  }).join("");
+}
+
+async function loadOrder() {
   const content = document.getElementById("content");
 
   if (!token) {
@@ -145,7 +373,6 @@ async function loadOrder() {
   }
 
   try {
-
     const response = await fetch(
       functionUrl + "?token=" + encodeURIComponent(token)
     );
@@ -156,71 +383,98 @@ async function loadOrder() {
 
     const order = await response.json();
 
-    const lines = Array.isArray(order.order_lines)
-      ? order.order_lines.map(line => `
-          <div class="line">
-            <div class="line-title">
-              ${line.Beskrivelse ?? line.Produkt ?? "Vare"}
-            </div>
+    const currentStatus =
+      order.production_status || "Ordre mottatt";
 
-            <div class="line-info">
-              ${line.Antall ?? ""} ${line.Enhet ?? ""}
+    const lines = Array.isArray(order.order_lines)
+      ? order.order_lines
+          .filter(line =>
+            line.Beskrivelse ||
+            line.Produkt ||
+            Number(line.Nettobeløp) > 0
+          )
+          .map(line => `
+            <div class="line">
+              <div class="line-title">
+                ${line.Beskrivelse ?? line.Produkt ?? "Vare"}
+              </div>
+              <div class="line-info">
+                ${line.Antall ?? ""} ${line.Enhet ?? ""}
+              </div>
             </div>
-          </div>
-        `).join("")
+          `).join("")
       : "Ingen ordrelinjer";
 
     content.innerHTML = `
 
       <div class="card">
 
-        <h2>Ordre ${order.sales_order_no}</h2>
+        <div class="order-head">
+          <div>
+            <div class="order-number-small">Produksjonsordre</div>
+            <h1 class="order-number">#${order.sales_order_no}</h1>
+          </div>
+        </div>
 
-        <div class="label">Kunde</div>
-        <div class="value">
+        <div class="customer">
           ${order.customer_name ?? "-"}
         </div>
 
-        <div class="label">Prosjekt</div>
-        <div class="value">
-          ${order.project_code ?? "-"}
+        <div class="details">
+
+          <div class="detail">
+            <div class="label">Prosjekt</div>
+            <div class="value">${order.project_code ?? "-"}</div>
+          </div>
+
+          <div class="detail">
+            <div class="label">Leveringsdato</div>
+            <div class="value">${order.delivery_date ?? "-"}</div>
+          </div>
+
         </div>
 
-        <div class="label">Leveringsdato</div>
-        <div class="value">
-          ${order.delivery_date ?? "-"}
-        </div>
-
-        <div class="label">Produksjonsstatus</div>
-        <div class="status">
-          ${order.production_status ?? "Ordre mottatt"}
-        </div>
-<div class="status-buttons">
-  <button onclick="updateStatus('Laserskjæring')">Laserskjæring</button>
-  <button onclick="updateStatus('Knekking')">Knekking</button>
-  <button onclick="updateStatus('Sveising')">Sveising</button>
-  <button onclick="updateStatus('Lakkering')">Lakkering</button>
-  <button onclick="updateStatus('Pakking')">Pakking</button>
-  <button onclick="updateStatus('Ferdig')">Ferdig</button>
-</div>
       </div>
 
       <div class="card">
 
-        <h2>Ordrelinjer</h2>
+        <h2 class="section-title">Produksjon</h2>
 
-        ${lines}
+        <div class="current-status">
+          <div class="current-status-label">Nåværende status</div>
+          <div class="current-status-value">${currentStatus}</div>
+        </div>
+
+        <div class="progress">
+          ${progressHTML(currentStatus)}
+        </div>
+
+        <div class="status-buttons">
+          <button onclick="updateStatus('Laserskjæring')">LASERSKJÆRING</button>
+          <button onclick="updateStatus('Knekking')">KNEKKING</button>
+          <button onclick="updateStatus('Sveising')">SVEISING</button>
+          <button onclick="updateStatus('Lakkering')">LAKKERING</button>
+          <button onclick="updateStatus('Pakking')">PAKKING</button>
+          <button class="finish" onclick="updateStatus('Ferdig')">✓ FERDIG</button>
+        </div>
+
+      </div>
+
+      <div class="card">
+
+        <h2 class="section-title">Ordrelinjer</h2>
+
+        ${lines || "Ingen ordrelinjer"}
 
       </div>
     `;
 
   } catch (error) {
-
     content.innerHTML =
       '<div class="error">Kunne ikke hente ordren.</div>';
-
   }
 }
+
 async function updateStatus(status) {
   try {
     const response = await fetch(
@@ -230,7 +484,7 @@ async function updateStatus(status) {
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({ status: status })
+        body: JSON.stringify({ status })
       }
     );
 
@@ -244,8 +498,8 @@ async function updateStatus(status) {
     alert("Kunne ikke oppdatere status.");
   }
 }
-loadOrder();
 
+loadOrder();
 </script>
 
 </body>
