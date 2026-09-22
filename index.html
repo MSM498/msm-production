@@ -17,7 +17,7 @@ body {
   color: #1f2937;
 }
 
-.topbar {
+.topbar {F
   background: #0a0b0e;
   border-bottom: 4px solid #f5a623;
   padding: 20px;
@@ -467,6 +467,19 @@ async function loadOrder() {
         ${lines || "Ingen ordrelinjer"}
 
       </div>
+      <div class="card">
+  <h2 class="section-title">QR-kode</h2>
+  <p>Scan QR-koden for å åpne denne produksjonsordren på mobil.</p>
+
+  <div style="margin-top:15px;">
+    <img
+      src="https://quickchart.io/qr?size=220&text=${encodeURIComponent(window.location.href)}"
+      width="220"
+      height="220"
+      alt="QR-kode for ordre #${order.sales_order_no}"
+    >
+  </div>
+</div>
     `;
 
   } catch (error) {
