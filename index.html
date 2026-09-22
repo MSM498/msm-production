@@ -1,30 +1,203 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="no">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MSM Production Automation</title>
+  <title>MSM Produksjon</title>
+
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: #f3f4f6;
+      color: #1f2937;
+    }
+
+    .container {
+      max-width: 650px;
+      margin: auto;
+      padding: 18px;
+    }
+
+    .header {
+      margin: 10px 0 20px;
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: 26px;
+    }
+
+    .header p {
+      margin: 5px 0 0;
+      color: #6b7280;
+    }
+
+    .card {
+      background: white;
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .label {
+      color: #6b7280;
+      font-size: 13px;
+      margin-top: 16px;
+    }
+
+    .value {
+      font-size: 18px;
+      font-weight: 600;
+      margin-top: 3px;
+    }
+
+    .status {
+      margin-top: 8px;
+      padding: 15px;
+      background: #e5e7eb;
+      border-radius: 10px;
+      font-size: 21px;
+      font-weight: bold;
+    }
+
+    .line {
+      padding: 14px 0;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .line:last-child {
+      border-bottom: none;
+    }
+
+    .line-title {
+      font-weight: bold;
+      font-size: 17px;
+    }
+
+    .line-info {
+      color: #6b7280;
+      margin-top: 4px;
+    }
+
+    .error {
+      background: #fff;
+      padding: 20px;
+      border-radius: 14px;
+    }
+  </style>
 </head>
+
 <body>
-  <h1>MSM Production Automation</h1>
-  <h2>Martin Sveis og Mekaniske AS</h2>
 
-  <p>
-    MSM Production Automation is an internal production, order tracking
-    and workflow automation system for Martin Sveis og Mekaniske AS.
-  </p>
+<div class="container">
 
-  <p>
-    The system integrates with PowerOffice Go and is used for production
-    planning, order tracking, customer communication, delivery status
-    and internal production workflows.
-  </p>
+  <div class="header">
+    <h1>MSM Produksjon</h1>
+    <p>Martin Sveis og Mekaniske AS</p>
+  </div>
 
-  <h2>Support</h2>
+  <div id="content">
+    Laster ordre...
+  </div>
 
-  <p>
-    Martin Sveis og Mekaniske AS<br>
-    Email: martin@martinsveis.no
-  </p>
+</div>
+
+<script>
+
+const params = new URLSearchParams(window.location.search);
+const token = params.get("token");
+
+const functionUrl =
+  "https://xhhahusvvvsuaypqwcar.supabase.co/functions/v1/production-order";
+
+async function loadOrder() {
+
+  const content = document.getElementById("content");
+
+  if (!token) {
+    content.innerHTML =
+      '<div class="error">Mangler ordrekode.</div>';
+    return;
+  }
+
+  try {
+
+    const response = await fetch(
+      functionUrl + "?token=" + encodeURIComponent(token)
+    );
+
+    if (!response.ok) {
+      throw new Error("Ordren ble ikke funnet");
+    }
+
+    const order = await response.json();
+
+    const lines = Array.isArray(order.order_lines)
+      ? order.order_lines.map(line => `
+          <div class="line">
+            <div class="line-title">
+              ${line.Beskrivelse ?? line.Produkt ?? "Vare"}
+            </div>
+
+            <div class="line-info">
+              ${line.Antall ?? ""} ${line.Enhet ?? ""}
+            </div>
+          </div>
+        `).join("")
+      : "Ingen ordrelinjer";
+
+    content.innerHTML = `
+
+      <div class="card">
+
+        <h2>Ordre ${order.sales_order_no}</h2>
+
+        <div class="label">Kunde</div>
+        <div class="value">
+          ${order.customer_name ?? "-"}
+        </div>
+
+        <div class="label">Prosjekt</div>
+        <div class="value">
+          ${order.project_code ?? "-"}
+        </div>
+
+        <div class="label">Leveringsdato</div>
+        <div class="value">
+          ${order.delivery_date ?? "-"}
+        </div>
+
+        <div class="label">Produksjonsstatus</div>
+        <div class="status">
+          ${order.production_status ?? "Ordre mottatt"}
+        </div>
+
+      </div>
+
+      <div class="card">
+
+        <h2>Ordrelinjer</h2>
+
+        ${lines}
+
+      </div>
+    `;
+
+  } catch (error) {
+
+    content.innerHTML =
+      '<div class="error">Kunne ikke hente ordren.</div>';
+
+  }
+}
+
+loadOrder();
+
+</script>
+
 </body>
 </html>
