@@ -194,7 +194,40 @@ body {
   background: #f5a623;
   color: #111;
 }
+<div class="card">
+  <h2 class="section-title">Prioritet</h2>
 
+  <p class="section-note">
+    Velg hvordan denne ordren skal prioriteres i produksjonen.
+  </p>
+
+  <div class="priority-selector">
+
+    <button
+      class="priority-button normal ${(order.priority || "Normal") === "Normal" ? "active" : ""}"
+      onclick="savePriority('Normal')">
+      ✓ Normal
+    </button>
+
+    <button
+      class="priority-button urgent ${order.priority === "Haster" ? "active" : ""}"
+      onclick="savePriority('Haster')">
+      ⚡ Haster
+    </button>
+
+    <button
+      class="priority-button stop ${order.priority === "Stopp/venter" ? "active" : ""}"
+      onclick="savePriority('Stopp/venter')">
+      ⛔ Stopp / venter
+    </button>
+
+  </div>
+
+  <div
+    id="priorityMessage"
+    class="priority-message">
+  </div>
+</div>
 /* PRODUKSJONSLØP */
 
 .stage-selector {
@@ -1021,7 +1054,61 @@ async function loadOrder() {
       </div>`;
   }
 }
+async function savePriority(priority) {
+  const message =
+    document.getElementById("priorityMessage");
 
+  if (message) {
+    message.textContent = "Lagrer...";
+  }
+
+  try {
+    const response = await fetch(
+      functionUrl +
+      "?token=" +
+      encodeURIComponent(token) +
+      "&action=priority",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          priority: priority
+        })
+      }
+    );
+
+    let result = null;
+
+    try {
+      result = await response.json();
+    } catch {}
+
+    if (!response.ok) {
+      throw new Error(
+        result?.error || "Kunne ikke lagre prioriteten."
+      );
+    }
+
+    if (message) {
+      message.textContent = "✓ Prioriteten er lagret.";
+    }
+
+    setTimeout(() => {
+      loadOrder();
+    }, 400);
+
+  } catch (error) {
+    console.error(error);
+
+    if (message) {
+      message.textContent =
+        "⚠ " +
+        (error.message || "Kunne ikke lagre prioriteten.");
+    }
+  }
+}
 async function saveRequiredStages() {
   const message =
     document.getElementById("stageMessage");
