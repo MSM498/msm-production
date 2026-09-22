@@ -3,12 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MSM Produksjon</title>
+<title>MSM Produksjonsordre</title>
 
 <style>
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
 body {
   margin: 0;
@@ -17,18 +15,18 @@ body {
   color: #1f2937;
 }
 
-.topbar {F
+.topbar {
   background: #0a0b0e;
   border-bottom: 4px solid #f5a623;
   padding: 20px;
 }
 
 .topbar-inner {
-  max-width: 700px;
+  max-width: 1000px;
   margin: auto;
   display: flex;
-  align-items: center;
   justify-content: space-between;
+  align-items: center;
 }
 
 .brand {
@@ -38,9 +36,7 @@ body {
   letter-spacing: 1px;
 }
 
-.brand span {
-  color: #f5a623;
-}
+.brand span { color: #f5a623; }
 
 .brand-small {
   color: #9ca3af;
@@ -48,85 +44,68 @@ body {
   margin-top: 4px;
 }
 
-.system-badge {
+.badge {
   background: #20232a;
   color: #d1d5db;
-  padding: 7px 10px;
+  padding: 8px 12px;
   border-radius: 7px;
   font-size: 11px;
   font-weight: bold;
 }
 
 .container {
-  max-width: 700px;
+  max-width: 1000px;
   margin: auto;
-  padding: 18px;
+  padding: 22px;
 }
 
 .card {
   background: white;
-  border-radius: 14px;
-  padding: 20px;
-  margin-bottom: 15px;
-  box-shadow: 0 5px 20px rgba(0,0,0,.22);
+  border-radius: 12px;
+  padding: 22px;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 15px rgba(0,0,0,.2);
 }
 
-.order-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 15px;
+.order-title {
+  margin: 0 0 5px;
+  font-size: 30px;
 }
 
-.order-number-small {
-  font-size: 12px;
-  text-transform: uppercase;
+.customer-name {
   color: #6b7280;
-  font-weight: bold;
-  letter-spacing: .8px;
+  font-size: 18px;
 }
 
-.order-number {
-  margin: 3px 0 0;
-  font-size: 32px;
-  color: #111827;
-}
-
-.customer {
-  font-size: 20px;
-  font-weight: bold;
-  margin-top: 14px;
-}
-
-.details {
+.info-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(3, 1fr);
   gap: 12px;
-  margin-top: 18px;
+  margin-top: 20px;
 }
 
-.detail {
-  background: #f3f4f6;
-  border-radius: 9px;
-  padding: 12px;
+.info-box {
+  background: #f5f6f8;
+  padding: 14px;
+  border-radius: 8px;
 }
 
 .label {
+  display: block;
   color: #6b7280;
-  font-size: 11px;
-  font-weight: bold;
+  font-size: 10px;
   text-transform: uppercase;
+  font-weight: bold;
+  margin-bottom: 5px;
 }
 
 .value {
-  font-size: 17px;
   font-weight: bold;
-  margin-top: 4px;
 }
 
 .section-title {
   margin: 0 0 15px;
-  font-size: 18px;
+  font-size: 20px;
 }
 
 .current-status {
@@ -134,163 +113,222 @@ body {
   border-left: 5px solid #f5a623;
   padding: 15px;
   border-radius: 8px;
-  margin-bottom: 18px;
-}
-
-.current-status-label {
-  font-size: 11px;
-  color: #7c5a17;
   font-weight: bold;
-  text-transform: uppercase;
-}
-
-.current-status-value {
-  font-size: 23px;
-  font-weight: 800;
-  margin-top: 3px;
-  color: #33250b;
+  margin-bottom: 18px;
 }
 
 .progress {
   display: flex;
-  justify-content: space-between;
-  position: relative;
-  margin: 24px 5px 28px;
+  gap: 5px;
+  margin: 18px 0;
 }
 
-.progress:before {
-  content: "";
-  position: absolute;
-  top: 13px;
-  left: 3%;
-  right: 3%;
-  height: 4px;
-  background: #e5e7eb;
+.progress-step {
+  flex: 1;
+  height: 8px;
+  background: #d1d5db;
+  border-radius: 5px;
 }
 
-.step {
-  position: relative;
-  z-index: 1;
-  text-align: center;
-  width: 14%;
-}
-
-.dot {
-  width: 29px;
-  height: 29px;
-  margin: auto;
-  border-radius: 50%;
-  background: #e5e7eb;
-  border: 4px solid white;
-  box-shadow: 0 0 0 2px #d1d5db;
-}
-
-.step.active .dot {
-  background: #f5a623;
-  box-shadow: 0 0 0 2px #f5a623;
-}
-
-.step.done .dot {
-  background: #198754;
-  box-shadow: 0 0 0 2px #198754;
-}
-
-.step-name {
-  font-size: 9px;
-  font-weight: bold;
-  margin-top: 8px;
-  color: #6b7280;
-}
+.progress-step.done { background: #198754; }
+.progress-step.current { background: #f5a623; }
 
 .status-buttons {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
 }
 
-.status-buttons button {
+.status-button {
   border: 0;
-  border-radius: 10px;
-  padding: 17px 8px;
-  font-size: 15px;
-  font-weight: bold;
-  cursor: pointer;
   background: #20232a;
   color: white;
-  transition: .1s;
+  padding: 13px 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
 }
 
-.status-buttons button:hover {
-  background: #30343c;
+.status-button:hover {
+  background: #f5a623;
+  color: #111;
 }
 
-.status-buttons button:active {
-  transform: scale(.97);
+.status-button.active {
+  background: #f5a623;
+  color: #111;
 }
 
-.status-buttons .finish {
-  background: #198754;
+.lines {
+  width: 100%;
+  border-collapse: collapse;
 }
 
-.status-buttons .finish:hover {
-  background: #157347;
-}
-
-.line {
-  padding: 15px 0;
+.lines th,
+.lines td {
+  padding: 11px;
+  text-align: left;
   border-bottom: 1px solid #e5e7eb;
-  display: flex;
-  justify-content: space-between;
-  gap: 15px;
 }
 
-.line:last-child {
-  border-bottom: 0;
-}
-
-.line-title {
-  font-size: 16px;
-  font-weight: bold;
-}
-
-.line-info {
+.lines th {
+  font-size: 11px;
   color: #6b7280;
+  text-transform: uppercase;
+}
+
+.photo-intro {
+  color: #6b7280;
+  margin-top: -5px;
+}
+
+.photo-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.photo-box {
+  background: #f5f6f8;
+  border-radius: 10px;
+  padding: 16px;
+}
+
+.photo-box h3 {
+  margin: 0 0 6px;
+}
+
+.photo-box p {
+  color: #6b7280;
+  font-size: 13px;
+  min-height: 32px;
+}
+
+.photo-button {
+  display: inline-block;
+  width: 100%;
+  text-align: center;
+  border: 0;
+  background: #20232a;
+  color: white;
+  padding: 13px;
+  border-radius: 8px;
   font-weight: bold;
-  white-space: nowrap;
+  cursor: pointer;
+}
+
+.photo-button:hover {
+  background: #f5a623;
+  color: #111;
+}
+
+.photo-button.after {
+  background: #f5a623;
+  color: #111;
+}
+
+.photo-button:disabled {
+  opacity: .55;
+  cursor: wait;
+}
+
+.upload-status {
+  margin-top: 15px;
+  font-weight: bold;
+}
+
+.gallery-title {
+  margin-top: 25px;
+  font-size: 16px;
+}
+
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.image-card {
+  background: #f5f6f8;
+  border-radius: 9px;
+  overflow: hidden;
+}
+
+.image-card img {
+  width: 100%;
+  height: 190px;
+  object-fit: cover;
+  display: block;
+}
+
+.image-info {
+  padding: 10px;
+  font-size: 12px;
+}
+
+.image-type {
+  font-weight: bold;
+  font-size: 13px;
+}
+
+.qr-wrap {
+  display: flex;
+  gap: 25px;
+  align-items: center;
+}
+
+.qr-wrap img {
+  width: 200px;
+  height: 200px;
+}
+
+.qr-text {
+  color: #6b7280;
+  max-width: 400px;
 }
 
 .error {
   background: white;
-  padding: 25px;
   border-radius: 12px;
+  padding: 25px;
 }
 
 .footer {
   text-align: center;
   color: #6b7280;
   font-size: 11px;
-  padding: 10px 0 30px;
+  padding: 25px;
 }
 
-@media (max-width: 480px) {
-  .container {
-    padding: 12px;
+@media (max-width: 700px) {
+  .container { padding: 12px; }
+  .badge { display: none; }
+
+  .info-grid,
+  .photo-actions {
+    grid-template-columns: 1fr;
   }
 
-  .topbar {
-    padding: 15px 12px;
+  .status-buttons {
+    grid-template-columns: repeat(2, 1fr);
   }
 
-  .brand {
-    font-size: 21px;
+  .gallery {
+    grid-template-columns: 1fr;
   }
 
-  .system-badge {
-    display: none;
+  .qr-wrap {
+    display: block;
   }
 
-  .step-name {
-    font-size: 8px;
+  .qr-wrap img {
+    margin-bottom: 12px;
+  }
+
+  .lines {
+    font-size: 12px;
   }
 }
 </style>
@@ -304,24 +342,20 @@ body {
       <div class="brand"><span>MSM</span> PRODUKSJON</div>
       <div class="brand-small">Martin Sveis og Mekaniske AS</div>
     </div>
-    <div class="system-badge">PRODUKSJONSSYSTEM</div>
+
+    <div class="badge">PRODUKSJONSORDRE</div>
   </div>
 </div>
 
-<div class="container">
-  <div id="content">
-    <div class="card">Laster ordre...</div>
-  </div>
+<div class="container" id="content">
+  <div class="card">Laster ordre...</div>
+</div>
 
-  <div class="footer">
-    Martin Sveis og Mekaniske AS
-  </div>
+<div class="footer">
+  MSM Produksjonssystem
 </div>
 
 <script>
-const params = new URLSearchParams(window.location.search);
-const token = params.get("token");
-
 const functionUrl =
   "https://xhhahusvvvsuaypqwcar.supabase.co/functions/v1/production-order";
 
@@ -335,32 +369,92 @@ const stages = [
   "Ferdig"
 ];
 
-function progressHTML(currentStatus) {
-  const currentIndex = stages.indexOf(currentStatus);
+const params = new URLSearchParams(window.location.search);
+const token = params.get("token");
 
-  const shortNames = [
-    "Mottatt",
-    "Laser",
-    "Knekk",
-    "Sveis",
-    "Lakk",
-    "Pakk",
-    "Ferdig"
-  ];
+let currentOrder = null;
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function formatDate(date) {
+  if (!date) return "-";
+
+  const parts = date.split("-");
+  if (parts.length !== 3) return date;
+
+  return `${parts[2]}.${parts[1]}.${parts[0]}`;
+}
+
+function progressHTML(status) {
+  const currentIndex = stages.indexOf(status);
 
   return stages.map((stage, index) => {
-    let state = "";
+    let cls = "progress-step";
 
-    if (index < currentIndex) state = "done";
-    if (index === currentIndex) state = "active";
+    if (index < currentIndex) cls += " done";
+    if (index === currentIndex) cls += " current";
+
+    return `<div class="${cls}" title="${escapeHtml(stage)}"></div>`;
+  }).join("");
+}
+
+function statusButtonsHTML(status) {
+  return stages.map(stage => {
+    const active = stage === status ? " active" : "";
 
     return `
-      <div class="step ${state}">
-        <div class="dot"></div>
-        <div class="step-name">${shortNames[index]}</div>
-      </div>
+      <button
+        class="status-button${active}"
+        onclick="updateStatus('${stage}')">
+        ${escapeHtml(stage)}
+      </button>
     `;
   }).join("");
+}
+
+function orderLinesHTML(lines) {
+  const filtered = Array.isArray(lines)
+    ? lines.filter(line =>
+        line.Beskrivelse ||
+        line.Produkt ||
+        Number(line.Nettobeløp) > 0
+      )
+    : [];
+
+  if (filtered.length === 0) {
+    return `<p>Ingen ordrelinjer registrert.</p>`;
+  }
+
+  return `
+    <table class="lines">
+      <thead>
+        <tr>
+          <th>Produkt</th>
+          <th>Beskrivelse</th>
+          <th>Antall</th>
+          <th>Enhet</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        ${filtered.map(line => `
+          <tr>
+            <td>${escapeHtml(line.Produkt || "-")}</td>
+            <td>${escapeHtml(line.Beskrivelse || "-")}</td>
+            <td>${escapeHtml(line.Antall ?? "-")}</td>
+            <td>${escapeHtml(line.Enhet || "-")}</td>
+          </tr>
+        `).join("")}
+      </tbody>
+    </table>
+  `;
 }
 
 async function loadOrder() {
@@ -368,7 +462,7 @@ async function loadOrder() {
 
   if (!token) {
     content.innerHTML =
-      '<div class="error">Mangler ordrekode.</div>';
+      `<div class="error">Mangler ordre-token i lenken.</div>`;
     return;
   }
 
@@ -378,113 +472,157 @@ async function loadOrder() {
     );
 
     if (!response.ok) {
-      throw new Error("Ordren ble ikke funnet");
+      throw new Error("Ordren kunne ikke hentes");
     }
 
     const order = await response.json();
+    currentOrder = order;
 
-    const currentStatus =
-      order.production_status || "Ordre mottatt";
-
-    const lines = Array.isArray(order.order_lines)
-      ? order.order_lines
-          .filter(line =>
-            line.Beskrivelse ||
-            line.Produkt ||
-            Number(line.Nettobeløp) > 0
-          )
-          .map(line => `
-            <div class="line">
-              <div class="line-title">
-                ${line.Beskrivelse ?? line.Produkt ?? "Vare"}
-              </div>
-              <div class="line-info">
-                ${line.Antall ?? ""} ${line.Enhet ?? ""}
-              </div>
-            </div>
-          `).join("")
-      : "Ingen ordrelinjer";
+    const status = order.production_status || "Ordre mottatt";
 
     content.innerHTML = `
-
       <div class="card">
+        <h1 class="order-title">
+          Ordre #${escapeHtml(order.sales_order_no)}
+        </h1>
 
-        <div class="order-head">
-          <div>
-            <div class="order-number-small">Produksjonsordre</div>
-            <h1 class="order-number">#${order.sales_order_no}</h1>
-          </div>
+        <div class="customer-name">
+          ${escapeHtml(order.customer_name || "-")}
         </div>
 
-        <div class="customer">
-          ${order.customer_name ?? "-"}
-        </div>
-
-        <div class="details">
-
-          <div class="detail">
-            <div class="label">Prosjekt</div>
-            <div class="value">${order.project_code ?? "-"}</div>
+        <div class="info-grid">
+          <div class="info-box">
+            <span class="label">Prosjekt</span>
+            <div class="value">
+              ${escapeHtml(order.project_code || "-")}
+            </div>
           </div>
 
-          <div class="detail">
-            <div class="label">Leveringsdato</div>
-            <div class="value">${order.delivery_date ?? "-"}</div>
+          <div class="info-box">
+            <span class="label">Leveringsdato</span>
+            <div class="value">
+              ${formatDate(order.delivery_date)}
+            </div>
           </div>
 
+          <div class="info-box">
+            <span class="label">Produksjonsstatus</span>
+            <div class="value">
+              ${escapeHtml(status)}
+            </div>
+          </div>
         </div>
-
       </div>
 
       <div class="card">
-
-        <h2 class="section-title">Produksjon</h2>
+        <h2 class="section-title">Produksjonsstatus</h2>
 
         <div class="current-status">
-          <div class="current-status-label">Nåværende status</div>
-          <div class="current-status-value">${currentStatus}</div>
+          Nåværende status: ${escapeHtml(status)}
         </div>
 
         <div class="progress">
-          ${progressHTML(currentStatus)}
+          ${progressHTML(status)}
         </div>
 
         <div class="status-buttons">
-          <button onclick="updateStatus('Laserskjæring')">LASERSKJÆRING</button>
-          <button onclick="updateStatus('Knekking')">KNEKKING</button>
-          <button onclick="updateStatus('Sveising')">SVEISING</button>
-          <button onclick="updateStatus('Lakkering')">LAKKERING</button>
-          <button onclick="updateStatus('Pakking')">PAKKING</button>
-          <button class="finish" onclick="updateStatus('Ferdig')">✓ FERDIG</button>
+          ${statusButtonsHTML(status)}
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="section-title">Ordrelinjer</h2>
+        ${orderLinesHTML(order.order_lines)}
+      </div>
+
+      <div class="card">
+        <h2 class="section-title">Lakkering – bildedokumentasjon</h2>
+
+        <p class="photo-intro">
+          Ta bilde av varen før og etter lakkering.
+          Bildene lagres på denne produksjonsordren.
+        </p>
+
+        <div class="photo-actions">
+
+          <div class="photo-box">
+            <h3>Før lakkering</h3>
+            <p>Dokumenter varen før den lakkeres.</p>
+
+            <input
+              id="beforeFile"
+              type="file"
+              accept="image/*"
+              capture="environment"
+              hidden
+              onchange="uploadImage('before', this)"
+            >
+
+            <button
+              class="photo-button"
+              onclick="document.getElementById('beforeFile').click()">
+              📷 Ta bilde før lakkering
+            </button>
+          </div>
+
+          <div class="photo-box">
+            <h3>Etter lakkering</h3>
+            <p>Dokumenter ferdig lakkert vare.</p>
+
+            <input
+              id="afterFile"
+              type="file"
+              accept="image/*"
+              capture="environment"
+              hidden
+              onchange="uploadImage('after', this)"
+            >
+
+            <button
+              class="photo-button after"
+              onclick="document.getElementById('afterFile').click()">
+              📷 Ta bilde etter lakkering
+            </button>
+          </div>
+
         </div>
 
+        <div id="uploadStatus" class="upload-status"></div>
+
+        <div class="gallery-title">
+          <strong>Lagrede bilder</strong>
+        </div>
+
+        <div id="gallery" class="gallery">
+          Laster bilder...
+        </div>
       </div>
 
       <div class="card">
+        <h2 class="section-title">QR-kode</h2>
 
-        <h2 class="section-title">Ordrelinjer</h2>
+        <div class="qr-wrap">
+          <img
+            src="https://quickchart.io/qr?size=220&text=${encodeURIComponent(window.location.href)}"
+            alt="QR-kode for ordre"
+          >
 
-        ${lines || "Ingen ordrelinjer"}
-
+          <div class="qr-text">
+            <strong>Scan med mobilkamera</strong>
+            <p>
+              QR-koden åpner denne produksjonsordren direkte.
+              Den kan skrives ut og følge varen gjennom produksjonen.
+            </p>
+          </div>
+        </div>
       </div>
-      <div class="card">
-  <h2 class="section-title">QR-kode</h2>
-  <p>Scan QR-koden for å åpne denne produksjonsordren på mobil.</p>
-
-  <div style="margin-top:15px;">
-    <img
-      src="https://quickchart.io/qr?size=220&text=${encodeURIComponent(window.location.href)}"
-      width="220"
-      height="220"
-      alt="QR-kode for ordre #${order.sales_order_no}"
-    >
-  </div>
-</div>
     `;
+
+    loadImages();
 
   } catch (error) {
     content.innerHTML =
-      '<div class="error">Kunne ikke hente ordren.</div>';
+      `<div class="error">Kunne ikke hente produksjonsordren.</div>`;
   }
 }
 
@@ -502,13 +640,129 @@ async function updateStatus(status) {
     );
 
     if (!response.ok) {
-      throw new Error("Kunne ikke oppdatere status");
+      throw new Error("Status kunne ikke oppdateres");
     }
 
     await loadOrder();
 
   } catch (error) {
-    alert("Kunne ikke oppdatere status.");
+    alert("Kunne ikke oppdatere produksjonsstatus.");
+  }
+}
+
+async function uploadImage(imageType, input) {
+  const file = input.files?.[0];
+  const statusBox = document.getElementById("uploadStatus");
+
+  if (!file) return;
+
+  statusBox.textContent = "Laster opp bilde...";
+
+  try {
+    const formData = new FormData();
+
+    formData.append("file", file);
+    formData.append("stage", "Lakkering");
+    formData.append("image_type", imageType);
+    formData.append("uploaded_by", "");
+
+    const response = await fetch(
+      functionUrl +
+        "?token=" +
+        encodeURIComponent(token) +
+        "&action=upload-image",
+      {
+        method: "POST",
+        body: formData
+      }
+    );
+
+    if (!response.ok) {
+      const message = await response.text();
+      throw new Error(message);
+    }
+
+    statusBox.textContent =
+      imageType === "before"
+        ? "✓ Bilde før lakkering er lagret."
+        : "✓ Bilde etter lakkering er lagret.";
+
+    input.value = "";
+
+    await loadImages();
+
+  } catch (error) {
+    console.error(error);
+    statusBox.textContent =
+      "Kunne ikke laste opp bildet.";
+  }
+}
+
+async function loadImages() {
+  const gallery = document.getElementById("gallery");
+
+  if (!gallery) return;
+
+  try {
+    const response = await fetch(
+      functionUrl +
+        "?token=" +
+        encodeURIComponent(token) +
+        "&action=images"
+    );
+
+    if (!response.ok) {
+      throw new Error("Kunne ikke hente bilder");
+    }
+
+    const images = await response.json();
+
+    if (!Array.isArray(images) || images.length === 0) {
+      gallery.innerHTML =
+        `<div>Ingen bilder lagret ennå.</div>`;
+      return;
+    }
+
+    gallery.innerHTML = images.map(image => {
+      const typeText =
+        image.image_type === "before"
+          ? "Før lakkering"
+          : "Etter lakkering";
+
+      if (!image.image_url) {
+        return `
+          <div class="image-card">
+            <div class="image-info">
+              <div class="image-type">${typeText}</div>
+              Bildet kunne ikke vises.
+            </div>
+          </div>
+        `;
+      }
+
+      return `
+        <div class="image-card">
+          <img
+            src="${image.image_url}"
+            alt="${typeText}"
+          >
+
+          <div class="image-info">
+            <div class="image-type">
+              ${typeText}
+            </div>
+
+            ${escapeHtml(image.stage || "")}
+          </div>
+        </div>
+      `;
+    }).join("");
+
+  } catch (error) {
+    console.error(error);
+
+    gallery.innerHTML =
+      `<div>Kunne ikke hente bilder.</div>`;
   }
 }
 
