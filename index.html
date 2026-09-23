@@ -649,6 +649,73 @@ body {
 }
 
 
+
+/* AVVIK */
+
+.deviation-button {
+  width: 100%;
+  margin-top: 14px;
+  border: 2px solid #b42318;
+  background: #fff;
+  color: #b42318;
+  padding: 15px 18px;
+  border-radius: 9px;
+  cursor: pointer;
+  font-size: 17px;
+  font-weight: 900;
+}
+
+.deviation-form {
+  margin-top: 14px;
+  padding: 16px;
+  border: 2px solid #b42318;
+  border-radius: 10px;
+  background: #fff7f6;
+}
+
+.deviation-form textarea {
+  width: 100%;
+  min-height: 100px;
+  box-sizing: border-box;
+  resize: vertical;
+  border: 1px solid #cfd4dc;
+  border-radius: 8px;
+  padding: 12px;
+  font: inherit;
+}
+
+.deviation-form input[type="file"] {
+  width: 100%;
+  margin: 12px 0;
+}
+
+.deviation-send, .deviation-cancel, .resolve-button {
+  padding: 11px 15px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 900;
+}
+
+.deviation-send {
+  border: 0;
+  background: #b42318;
+  color: white;
+}
+
+.deviation-cancel {
+  border: 1px solid #cfd4dc;
+  background: white;
+  margin-left: 8px;
+}
+
+.deviation-card { border-left: 5px solid #b42318; }
+.deviation-item { padding: 14px 0; border-top: 1px solid #e5e7eb; }
+.deviation-item:first-child { border-top: 0; }
+.deviation-open { color: #b42318; font-weight: 900; }
+.deviation-resolved { color: #166534; font-weight: 900; }
+.deviation-image { display:block; max-width:260px; width:100%; margin-top:10px; border-radius:8px; }
+.resolve-button { border:0; background:#166534; color:white; margin-top:10px; }
+
 /* ADMIN */
 
 .admin-top-button {
@@ -1337,6 +1404,220 @@ function nextStepHTML(status, stages) {
   `;
 }
 
+
+/* =========================================================
+   AVVIK
+========================================================= */
+
+function deviationFormHTML() {
+  return `
+    <button class="deviation-button" onclick="toggleDeviationForm()">
+      ⚠ Meld avvik / problem
+    </button>
+
+    <div id="deviationForm" class="deviation-form" style="display:none">
+      <strong>Hva er problemet?</strong>
+
+      <textarea
+        id="deviationDescription"
+        placeholder="F.eks. mangler 4 braketter, feil mål eller skade på del"></textarea>
+
+      <div style="font-weight:800;margin-top:12px">
+        Bilde (valgfritt)
+      </div>
+
+      <input
+        id="deviationImage"
+        type="file"
+        accept="image/*"
+        capture="environment">
+
+      <button class="deviation-send" onclick="submitDeviation()">
+        Send avvik
+      </button>
+
+      <button class="deviation-cancel" onclick="toggleDeviationForm(false)">
+        Avbryt
+      </button>
+
+      <div id="deviationMessage" class="message"></div>
+    </div>
+  `;
+}
+
+function toggleDeviationForm(force) {
+  const form = document.getElementById("deviationForm");
+  if (!form) return;
+
+  const show = typeof force === "boolean"
+    ? force
+    : form.style.display === "none";
+
+  form.style.display = show ? "block" : "none";
+
+  if (show) {
+    document.getElementById("deviationDescription")?.focus();
+  }
+}
+
+async function submitDeviation() {
+  const description =
+    document.getElementById("deviationDescription")?.value?.trim() || "";
+  const file =
+    document.getElementById("deviationImage")?.files?.[0];
+  const message =
+    document.getElementById("deviationMessage");
+  const employeeName =
+    localStorage.getItem("msm_employee_name") || "";
+
+  if (!employeeName) {
+    if (message) message.textContent = "⚠ Velg operatør først.";
+    return;
+  }
+
+  if (!description) {
+    if (message) message.textContent = "⚠ Skriv hva problemet er.";
+    return;
+  }
+
+  if (message) message.textContent = "Sender avvik...";
+
+  const formData = new FormData();
+  formData.append("employee_name", employeeName);
+  formData.append("description", description);
+  if (file) formData.append("file", file);
+
+  try {
+    const response = await fetch(
+      functionUrl + "?token=" + encodeURIComponent(token) + "&action=deviation",
+      { method: "POST", body: formData }
+    );
+
+    let result = null;
+    try { result = await response.json(); } catch {}
+
+    if (!response.ok) {
+      throw new Error(result?.error || "Kunne ikke registrere avviket.");
+    }
+
+    alert("Avvik registrert. Ordren er satt til Stopp/venter.");
+    await loadOrder();
+  } catch (error) {
+    if (message) {
+      message.textContent = "⚠ " + (error.message || "Kunne ikke registrere avviket.");
+    }
+  }
+}
+
+async function loadDeviations() {
+  const container = document.getElementById("deviationsList");
+  if (!container) return;
+
+  try {
+    const response = await fetch(
+      functionUrl + "?token=" + encodeURIComponent(token) + "&action=deviations"
+    );
+    const deviations = await response.json();
+
+    if (!response.ok || !Array.isArray(deviations)) throw new Error();
+
+    if (!deviations.length) {
+      container.innerHTML = '<div class="section-note">Ingen avvik registrert.</div>';
+      return;
+    }
+
+    container.innerHTML = deviations.map((item) => {
+      const open = item.status !== "Løst";
+      const created = item.created_at
+        ? new Date(item.created_at).toLocaleString("nb-NO")
+        : "";
+      const resolved = item.resolved_at
+        ? new Date(item.resolved_at).toLocaleString("nb-NO")
+        : "";
+
+      return `
+        <div class="deviation-item">
+          <div class="${open ? "deviation-open" : "deviation-resolved"}">
+            ${open ? "⚠ Åpent avvik" : "✓ Løst"}
+          </div>
+
+          <div style="margin-top:6px;font-weight:800">
+            ${escapeHtml(item.description || "")}
+          </div>
+
+          <div class="section-note" style="margin-top:6px">
+            ${escapeHtml(item.employee_name || "")}
+            ${created ? " • " + escapeHtml(created) : ""}
+            ${item.production_status ? " • " + escapeHtml(item.production_status) : ""}
+          </div>
+
+          ${item.image_url ? `
+            <img class="deviation-image" src="${item.image_url}" alt="Bilde av avvik">
+          ` : ""}
+
+          ${!open && item.resolved_by ? `
+            <div class="section-note" style="margin-top:8px">
+              Løst av ${escapeHtml(item.resolved_by)}
+              ${resolved ? " • " + escapeHtml(resolved) : ""}
+              ${item.resolution_note ? "<br>" + escapeHtml(item.resolution_note) : ""}
+            </div>
+          ` : ""}
+
+          ${open && isAdmin ? `
+            <button class="resolve-button" onclick="resolveDeviation(${Number(item.id)})">
+              ✓ Marker som løst
+            </button>
+          ` : ""}
+        </div>
+      `;
+    }).join("");
+  } catch {
+    container.innerHTML =
+      '<div class="section-note">Kunne ikke hente avvik.</div>';
+  }
+}
+
+async function resolveDeviation(id) {
+  if (!isAdmin) return;
+
+  const employeeName =
+    localStorage.getItem("msm_employee_name") || "";
+
+  if (!employeeName) {
+    alert("Velg operatør først.");
+    return;
+  }
+
+  const note = prompt("Hva ble gjort for å løse avviket? (valgfritt)");
+  if (note === null) return;
+
+  try {
+    const response = await fetch(
+      functionUrl + "?token=" + encodeURIComponent(token) + "&action=resolve-deviation",
+      {
+        method: "POST",
+        headers: adminHeaders({ "Content-Type": "application/json" }),
+        body: JSON.stringify({
+          deviation_id: id,
+          resolved_by: employeeName,
+          resolution_note: note.trim()
+        })
+      }
+    );
+
+    let result = null;
+    try { result = await response.json(); } catch {}
+
+    if (!response.ok) {
+      throw new Error(result?.error || "Kunne ikke lukke avviket.");
+    }
+
+    await loadDeviations();
+  } catch (error) {
+    alert(error.message || "Kunne ikke lukke avviket.");
+  }
+}
+
 /* =========================================================
    PRODUKSJONSLØP
 ========================================================= */
@@ -1836,6 +2117,8 @@ async function loadOrder() {
 
         ${nextStepHTML(status, activeStages)}
 
+        ${deviationFormHTML()}
+
         ${isAdmin ? `
           <div class="manual-status-title">
             Manuell statusendring
@@ -1856,6 +2139,19 @@ async function loadOrder() {
         </h2>
 
         ${orderLinesHTML(order.order_lines)}
+
+      </div>
+
+
+      <div class="card deviation-card">
+
+        <h2 class="section-title">
+          Avvik / problemer
+        </h2>
+
+        <div id="deviationsList">
+          Laster avvik...
+        </div>
 
       </div>
 
@@ -1911,6 +2207,7 @@ async function loadOrder() {
     `;
 
     loadHistory();
+    loadDeviations();
 
     if (
       requiredStages.includes("Lakkering")
