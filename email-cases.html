@@ -326,7 +326,93 @@ button {
   <div id="cases" class="cases hidden"></div>
 
 </div>
+<!-- ORDREFORSLAG -->
+<div id="orderModal" class="hidden" style="
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.75);
+  z-index:9999;
+  padding:25px;
+  overflow:auto;
+">
 
+  <div style="
+    max-width:700px;
+    margin:40px auto;
+    background:white;
+    border-radius:12px;
+    padding:25px;
+  ">
+
+    <h2 style="margin-top:0;">Opprett ordre</h2>
+
+    <p style="color:#6b7280;">
+      Kontroller opplysningene før ordren opprettes i PowerOffice.
+    </p>
+
+    <input id="orderCaseId" type="hidden">
+
+    <div class="section">
+      <span class="label">Kunde / avsender</span>
+      <input id="orderCustomer" style="width:100%;padding:11px;">
+    </div>
+
+    <div class="section">
+      <span class="label">E-post</span>
+      <input id="orderEmail" style="width:100%;padding:11px;">
+    </div>
+
+    <div class="section">
+      <span class="label">Beskrivelse</span>
+      <input id="orderProduct" style="width:100%;padding:11px;">
+    </div>
+
+    <div class="section">
+      <span class="label">Mengde</span>
+      <input id="orderQuantity" style="width:100%;padding:11px;">
+    </div>
+
+    <div class="section">
+      <span class="label">Produksjonsopplysninger</span>
+      <textarea
+        id="orderProductionInfo"
+        rows="4"
+        style="width:100%;padding:11px;"></textarea>
+    </div>
+
+    <div class="section">
+      <span class="label">Prosjekt / referanse</span>
+      <input id="orderProject" style="width:100%;padding:11px;">
+    </div>
+
+    <div class="section">
+      <span class="label">Ønsket leveringsdato</span>
+      <input id="orderDeliveryDate" style="width:100%;padding:11px;">
+    </div>
+
+    <div style="
+      display:flex;
+      justify-content:flex-end;
+      gap:10px;
+      margin-top:22px;
+    ">
+
+      <button
+        class="btn-secondary"
+        onclick="closeOrderModal()">
+        Avbryt
+      </button>
+
+      <button
+        class="btn-primary"
+        onclick="confirmOrder()">
+        Opprett ordre i PowerOffice
+      </button>
+
+    </div>
+
+  </div>
+</div>
 <div class="footer">
   MSM Produksjonssystem
 </div>
@@ -417,7 +503,79 @@ async function login() {
   }
 }
 function startOrder(id) {
-  alert("Ordreforslag for e-postsak #" + id + " kommer her.");
+
+  const item = window.emailCases.find(
+    x => Number(x.id) === Number(id)
+  );
+
+  if (!item) {
+    alert("Fant ikke e-postsaken.");
+    return;
+  }
+
+  document.getElementById("orderCaseId").value =
+    item.id ?? "";
+
+  document.getElementById("orderCustomer").value =
+    item.sender ?? "";
+
+  document.getElementById("orderEmail").value =
+    item.sender ?? "";
+
+  document.getElementById("orderProduct").value =
+    item.product ?? "";
+
+  document.getElementById("orderQuantity").value =
+    item.quantity ?? "";
+
+  const productionInfo = [];
+
+  if (Array.isArray(item.production_info)) {
+    productionInfo.push(...item.production_info);
+  }
+
+  if (item.surface_treatment) {
+    productionInfo.push(
+      "Overflate: " + item.surface_treatment
+    );
+  }
+
+  if (item.ral) {
+    productionInfo.push(
+      "RAL: " +
+      (
+        Array.isArray(item.ral)
+          ? item.ral.join(" / ")
+          : item.ral
+      )
+    );
+  }
+
+  document.getElementById("orderProductionInfo").value =
+    productionInfo.join("\n");
+
+  document.getElementById("orderProject").value =
+    item.project ?? "";
+
+  document.getElementById("orderDeliveryDate").value =
+    item.requested_delivery_date ?? "";
+
+  document
+    .getElementById("orderModal")
+    .classList.remove("hidden");
+}
+
+function closeOrderModal() {
+  document
+    .getElementById("orderModal")
+    .classList.add("hidden");
+}
+
+function confirmOrder() {
+  alert(
+    "Testmodus: Ingen ordre er opprettet i PowerOffice ennå."
+  );
+}
 }
 async function logout() {
 
@@ -520,7 +678,7 @@ async function loadCases() {
     }
 
     const cases = await response.json();
-
+window.emailCases = cases;
     showCases();
 
     if (!Array.isArray(cases)) {
