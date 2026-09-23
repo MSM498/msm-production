@@ -27,10 +27,47 @@ function chooseCustomer(id){selectedCustomerId.value=String(id);document.querySe
 async function searchPowerOfficeCustomer(x){let e=email(x.sender).trim(),n=senderName(x.sender),q=e||n;if(!q){customerState.className="customerstate bad";customerState.textContent="Fant ingen e-post eller navn å søke etter.";return}try{let r=await fetch(functionUrl+"?action=poweroffice-customer-search&q="+encodeURIComponent(q),{headers:{"x-msm-admin-token":adminToken}}),d=await r.json();if(r.status===401){logout();return}if(!r.ok)throw Error(d.error||"Kundesøk feilet");let a=Array.isArray(d.customers)?d.customers:[];if(a.length===0&&e&&n){r=await fetch(functionUrl+"?action=poweroffice-customer-search&q="+encodeURIComponent(n),{headers:{"x-msm-admin-token":adminToken}});d=await r.json();if(!r.ok)throw Error(d.error||"Kundesøk feilet");a=Array.isArray(d.customers)?d.customers:[]}
 if(!a.length){customerState.className="customerstate warn";customerState.textContent="Ingen kunde funnet i PowerOffice Demo. Ordren kan ikke opprettes før kunde er valgt/opprettet.";customerResults.innerHTML="";return}
 customerResults.innerHTML=a.map(c=>`<label class="customeroption"><input type="radio" name="poCustomer" value="${esc(c.id)}" onchange="chooseCustomer('${esc(c.id)}')"><b>${esc(c.name||c.legal_name||"Uten navn")}</b><small>Kundenr. ${esc(c.number??"-")} · ${esc(c.email||c.invoice_email||"ingen e-post")}${c.organization_number?" · Org.nr. "+esc(c.organization_number):""}</small></label>`).join("");
-if(a.length===1){customerState.className="customerstate good";customerState.textContent="Én kunde funnet og valgt automatisk.";chooseCustomer(a[0].id)}
-else{customerState.className="customerstate warn";customerState.textContent=a.length+" kunder funnet. Velg riktig kunde før du går videre."}
+let exactCount=Number(d.exact_email_matches??0);
+if(e&&exactCount===1){
+  let exact=a.filter(c=>String(c.email??"").trim().toLowerCase()===e.toLowerCase()||String(c.invoice_email??"").trim().toLowerCase()===e.toLowerCase());
+  if(exact.length===1){customerState.className="customerstate good";customerState.textContent="Eksakt e-posttreff funnet og valgt automatisk.";chooseCustomer(exact[0].id)}
+  else{customerState.className="customerstate warn";customerState.textContent=a.length+" kunde(r) funnet. Velg riktig kunde før du går videre."}
+}else{customerState.className="customerstate warn";customerState.textContent=a.length+" kunde(r) funnet. Velg riktig kunde før du går videre."}
 }catch(err){customerState.className="customerstate bad";customerState.textContent=err.message;customerResults.innerHTML=""}}
-function confirmOrder(){if(!selectedCustomerId.value){alert("Velg PowerOffice-kunde først.");return}alert("Kunde valgt: PowerOffice ID "+selectedCustomerId.value+"\\n\\nTestmodus: Ingen ordre er opprettet i PowerOffice ennå.")}
+async function confirmOrder(){
+  if(!selectedCustomerId.value){alert("Velg PowerOffice-kunde først.");return}
+  if(!orderProduct.value.trim()){alert("Beskrivelse kan ikke være tom.");return}
+  if(!confirm("Opprette denne ordren som Draft i PowerOffice Demo?\n\nPris settes til 0 kr og må kontrolleres i PowerOffice."))return;
+  createOrderBtn.disabled=true;
+  let oldText=createOrderBtn.textContent;
+  createOrderBtn.textContent="Oppretter...";
+  try{
+    let r=await fetch(functionUrl+"?action=poweroffice-create-order",{
+      method:"POST",
+      headers:{"Content-Type":"application/json","x-msm-admin-token":adminToken},
+      body:JSON.stringify({
+        case_id:Number(orderCaseId.value),
+        customer_id:Number(selectedCustomerId.value),
+        description:orderProduct.value.trim(),
+        quantity:orderQuantity.value.trim(),
+        production_info:orderProductionInfo.value.trim(),
+        project:orderProject.value.trim(),
+        delivery_date:orderDeliveryDate.value.trim()
+      })
+    });
+    let d=await r.json();
+    if(r.status===401){logout();return}
+    if(!r.ok)throw Error(d.error||"Kunne ikke opprette ordren");
+    alert("Ordren er opprettet som Draft i PowerOffice Demo.\n\nKunde: "+(d.customer?.name||"-")+"\nReferanse: "+(d.external_import_reference||"-")+"\n\nPris er 0 kr og må kontrolleres i PowerOffice.");
+    closeOrderModal();
+    await loadCases();
+  }catch(err){
+    alert(err.message);
+    createOrderBtn.disabled=false;
+  }finally{
+    createOrderBtn.textContent=oldText;
+  }
+}
 async function checkAdmin(){if(!adminToken){showLogin();return}try{let r=await fetch(functionUrl+"?action=admin-check",{headers:{"x-msm-admin-token":adminToken}}),d=await r.json();if(!r.ok||!d.admin){logout();return}await loadCases()}catch{showLogin()}}
 async function loadCases(){let c=document.getElementById("cases");try{let r=await fetch(functionUrl+"?view=email-cases",{headers:{"x-msm-admin-token":adminToken}});if(r.status===401){logout();return}if(!r.ok)throw Error("Kunne ikke hente e-postsakene");let a=await r.json();if(!Array.isArray(a))throw Error("Ugyldig svar fra server");emailCases=a;showCases();document.getElementById("counter").textContent=a.filter(x=>x.status==="Må behandles").length+" må behandles";c.innerHTML=a.map(x=>{let done=x.status==="Behandlet",t=[];if(x.case_type)t.push(`<span class="tag">${esc(x.case_type)}</span>`);if(x.product)t.push(`<span class="tag">Produkt: ${esc(x.product)}</span>`);if(x.quantity!=null)t.push(`<span class="tag">Antall: ${esc(x.quantity)}</span>`);if(x.surface_treatment)t.push(`<span class="tag">Overflate: ${esc(x.surface_treatment)}</span>`);if(x.ral)t.push(`<span class="tag">RAL ${esc(ral(x.ral))}</span>`);if(x.project)t.push(`<span class="tag">Prosjekt: ${esc(x.project)}</span>`);return `<div class="card ${done?"done":""}"><div class="ctop"><div><div class="title">${esc(x.subject||"(uten emne)")}</div><div class="from">${esc(x.sender||"-")}</div></div><div class="status">${esc(x.status||"-")}</div></div><div class="tags">${t.join("")}</div><div class="sec"><span class="label">E-post</span><div class="box">${esc(x.body||"-")}</div></div><div class="sec"><span class="label">AI svarforslag</span><div class="box draft">${esc(x.draft_reply||"-")}</div></div>${!done?`<div class="sec"><button class="primary" onclick="startOrder(${Number(x.id)})">Opprett ordre</button></div>`:""}<div class="date">Mottatt: ${esc(fmt(x.created_at))}${done&&x.handled_at?" · Behandlet: "+esc(fmt(x.handled_at)):""}${done&&x.handled_by?" · Av: "+esc(x.handled_by):""}</div></div>`}).join("")||'<div class="empty">Ingen e-postsaker.</div>'}catch(x){showCases();c.innerHTML='<div class="error">'+esc(x.message)+'</div>'}}
 document.getElementById("pin").addEventListener("keydown",e=>{if(e.key==="Enter")login()});checkAdmin();setInterval(()=>{if(adminToken)loadCases()},30000);
