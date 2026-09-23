@@ -3,10 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>MSM Produksjonsordre</title>
 
 <style>
-* { box-sizing: border-box; }
+* {
+  box-sizing: border-box;
+}
 
 body {
   margin: 0;
@@ -36,7 +39,9 @@ body {
   letter-spacing: 1px;
 }
 
-.brand span { color: #f5a623; }
+.brand span {
+  color: #f5a623;
+}
 
 .brand-small {
   color: #9ca3af;
@@ -66,6 +71,8 @@ body {
   margin-bottom: 16px;
   box-shadow: 0 4px 15px rgba(0,0,0,.2);
 }
+
+/* OPERATØR */
 
 .user-card {
   background: #20232a;
@@ -102,6 +109,8 @@ body {
   font-weight: bold;
 }
 
+/* ORDRE */
+
 .order-title {
   margin: 0 0 5px;
   font-size: 30px;
@@ -114,7 +123,7 @@ body {
 
 .info-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 12px;
   margin-top: 20px;
 }
@@ -134,7 +143,21 @@ body {
   margin-bottom: 5px;
 }
 
-.value { font-weight: bold; }
+.value {
+  font-weight: bold;
+}
+
+.priority-value-normal {
+  color: #146c43;
+}
+
+.priority-value-urgent {
+  color: #b46900;
+}
+
+.priority-value-stop {
+  color: #b42318;
+}
 
 .section-title {
   margin: 0 0 15px;
@@ -148,86 +171,53 @@ body {
   font-size: 14px;
 }
 
-.current-status {
-  background: #fff4df;
-  border-left: 5px solid #f5a623;
-  padding: 15px;
-  border-radius: 8px;
-  font-weight: bold;
-  margin-bottom: 18px;
-}
+/* PRIORITERING */
 
-.progress {
-  display: flex;
-  gap: 5px;
-  margin: 18px 0;
-}
-
-.progress-step {
-  flex: 1;
-  height: 8px;
-  background: #d1d5db;
-  border-radius: 5px;
-}
-
-.progress-step.done { background: #198754; }
-.progress-step.current { background: #f5a623; }
-
-.status-buttons {
+.priority-selector {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
 }
 
-.status-button {
-  border: 0;
-  background: #20232a;
-  color: white;
-  padding: 13px 8px;
-  border-radius: 8px;
+.priority-button {
+  border: 2px solid #e5e7eb;
+  background: #f5f6f8;
+  color: #1f2937;
+  padding: 16px 10px;
+  border-radius: 9px;
   cursor: pointer;
+  font-weight: 800;
+  font-size: 14px;
+  transition: .15s;
+}
+
+.priority-button:hover {
+  border-color: #f5a623;
+}
+
+.priority-button.normal.active {
+  background: #e8f5ee;
+  border-color: #198754;
+  color: #146c43;
+}
+
+.priority-button.urgent.active {
+  background: #fff4df;
+  border-color: #f5a623;
+  color: #8a5500;
+}
+
+.priority-button.stop.active {
+  background: #fff0f0;
+  border-color: #dc3545;
+  color: #a61b1b;
+}
+
+.priority-message {
+  margin-top: 12px;
   font-weight: bold;
 }
 
-.status-button:hover,
-.status-button.active {
-  background: #f5a623;
-  color: #111;
-}
-<div class="card">
-  <h2 class="section-title">Prioritet</h2>
-
-  <p class="section-note">
-    Velg hvordan denne ordren skal prioriteres i produksjonen.
-  </p>
-
-  <div class="priority-selector">
-
-    <button
-      class="priority-button normal ${(order.priority || "Normal") === "Normal" ? "active" : ""}"
-      onclick="savePriority('Normal')">
-      ✓ Normal
-    </button>
-
-    <button
-      class="priority-button urgent ${order.priority === "Haster" ? "active" : ""}"
-      onclick="savePriority('Haster')">
-      ⚡ Haster
-    </button>
-
-    <button
-      class="priority-button stop ${order.priority === "Stopp/venter" ? "active" : ""}"
-      onclick="savePriority('Stopp/venter')">
-      ⛔ Stopp / venter
-    </button>
-
-  </div>
-
-  <div
-    id="priorityMessage"
-    class="priority-message">
-  </div>
-</div>
 /* PRODUKSJONSLØP */
 
 .stage-selector {
@@ -307,6 +297,62 @@ body {
   font-weight: bold;
 }
 
+/* STATUS */
+
+.current-status {
+  background: #fff4df;
+  border-left: 5px solid #f5a623;
+  padding: 15px;
+  border-radius: 8px;
+  font-weight: bold;
+  margin-bottom: 18px;
+}
+
+.progress {
+  display: flex;
+  gap: 5px;
+  margin: 18px 0;
+}
+
+.progress-step {
+  flex: 1;
+  height: 8px;
+  background: #d1d5db;
+  border-radius: 5px;
+}
+
+.progress-step.done {
+  background: #198754;
+}
+
+.progress-step.current {
+  background: #f5a623;
+}
+
+.status-buttons {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.status-button {
+  border: 0;
+  background: #20232a;
+  color: white;
+  padding: 13px 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.status-button:hover,
+.status-button.active {
+  background: #f5a623;
+  color: #111;
+}
+
+/* ORDRELINJER */
+
 .lines {
   width: 100%;
   border-collapse: collapse;
@@ -324,6 +370,8 @@ body {
   color: #6b7280;
   text-transform: uppercase;
 }
+
+/* LAKKERING */
 
 .photo-intro {
   color: #6b7280;
@@ -368,7 +416,9 @@ body {
   padding: 16px;
 }
 
-.photo-box h3 { margin: 0 0 6px; }
+.photo-box h3 {
+  margin: 0 0 6px;
+}
 
 .photo-box p {
   color: #6b7280;
@@ -435,6 +485,8 @@ body {
   margin-bottom: 4px;
 }
 
+/* HISTORIKK */
+
 .history-item {
   display: flex;
   gap: 14px;
@@ -442,7 +494,9 @@ body {
   border-bottom: 1px solid #e5e7eb;
 }
 
-.history-item:last-child { border-bottom: 0; }
+.history-item:last-child {
+  border-bottom: 0;
+}
 
 .history-marker {
   width: 12px;
@@ -453,7 +507,9 @@ body {
   margin-top: 5px;
 }
 
-.history-main { flex: 1; }
+.history-main {
+  flex: 1;
+}
 
 .history-top {
   display: flex;
@@ -462,7 +518,9 @@ body {
   margin-bottom: 5px;
 }
 
-.history-employee { font-weight: 800; }
+.history-employee {
+  font-weight: 800;
+}
 
 .history-time {
   color: #6b7280;
@@ -488,6 +546,8 @@ body {
   border-radius: 8px;
 }
 
+/* MELDINGER */
+
 .message {
   display: none;
   padding: 15px;
@@ -502,6 +562,8 @@ body {
   color: #a61b1b;
   border-left: 5px solid #dc3545;
 }
+
+/* QR */
 
 .qr-wrap {
   display: flex;
@@ -532,14 +594,26 @@ body {
   padding: 25px;
 }
 
-@media (max-width: 700px) {
-  .container { padding: 12px; }
-  .badge { display: none; }
+/* MOBIL */
 
-  .info-grid,
+@media (max-width: 700px) {
+
+  .container {
+    padding: 12px;
+  }
+
+  .badge {
+    display: none;
+  }
+
+  .info-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
   .photo-actions,
   .photo-requirements,
-  .stage-selector {
+  .stage-selector,
+  .priority-selector {
     grid-template-columns: 1fr;
   }
 
@@ -547,12 +621,21 @@ body {
     grid-template-columns: repeat(2, 1fr);
   }
 
-  .gallery { grid-template-columns: 1fr; }
+  .gallery {
+    grid-template-columns: 1fr;
+  }
 
-  .qr-wrap { display: block; }
-  .qr-wrap img { margin-bottom: 12px; }
+  .qr-wrap {
+    display: block;
+  }
 
-  .history-top { display: block; }
+  .qr-wrap img {
+    margin-bottom: 12px;
+  }
+
+  .history-top {
+    display: block;
+  }
 
   .history-time {
     margin-top: 3px;
@@ -565,21 +648,36 @@ body {
 
 <div class="topbar">
   <div class="topbar-inner">
+
     <div>
-      <div class="brand"><span>MSM</span> PRODUKSJON</div>
-      <div class="brand-small">Martin Sveis og Mekaniske AS</div>
+      <div class="brand">
+        <span>MSM</span> PRODUKSJON
+      </div>
+
+      <div class="brand-small">
+        Martin Sveis og Mekaniske AS
+      </div>
     </div>
-    <div class="badge">PRODUKSJONSORDRE</div>
+
+    <div class="badge">
+      PRODUKSJONSORDRE
+    </div>
+
   </div>
 </div>
 
 <div class="container" id="content">
-  <div class="card">Laster ordre...</div>
+  <div class="card">
+    Laster ordre...
+  </div>
 </div>
 
-<div class="footer">MSM Produksjonssystem</div>
+<div class="footer">
+  MSM Produksjonssystem
+</div>
 
 <script>
+
 const functionUrl =
   "https://xhhahusvvvsuaypqwcar.supabase.co/functions/v1/production-order";
 
@@ -600,10 +698,17 @@ const oldDefaultStages = [
   "Pakking"
 ];
 
-const params = new URLSearchParams(window.location.search);
-const token = params.get("token");
+const params =
+  new URLSearchParams(window.location.search);
+
+const token =
+  params.get("token");
 
 let currentOrder = null;
+
+/* =========================================================
+   HJELPEFUNKSJONER
+========================================================= */
 
 function escapeHtml(value) {
   return String(value ?? "")
@@ -622,11 +727,17 @@ function ensureEmployeeName() {
   let name = getEmployeeName();
 
   if (!name) {
-    name = prompt("Hvem bruker mobilen? Skriv navnet ditt:");
+    name = prompt(
+      "Hvem bruker mobilen? Skriv navnet ditt:"
+    );
 
     if (name && name.trim()) {
       name = name.trim();
-      localStorage.setItem("msm_employee_name", name);
+
+      localStorage.setItem(
+        "msm_employee_name",
+        name
+      );
     }
   }
 
@@ -642,7 +753,11 @@ function changeEmployee() {
   );
 
   if (name && name.trim()) {
-    localStorage.setItem("msm_employee_name", name.trim());
+    localStorage.setItem(
+      "msm_employee_name",
+      name.trim()
+    );
+
     loadOrder();
   }
 }
@@ -652,7 +767,9 @@ function formatDate(date) {
 
   const parts = date.split("-");
 
-  if (parts.length !== 3) return date;
+  if (parts.length !== 3) {
+    return date;
+  }
 
   return `${parts[2]}.${parts[1]}.${parts[0]}`;
 }
@@ -662,25 +779,30 @@ function formatHistoryDate(value) {
 
   const date = new Date(value);
 
-  if (Number.isNaN(date.getTime())) return value;
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
 
-  return new Intl.DateTimeFormat("nb-NO", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit"
-  }).format(date);
+  return new Intl.DateTimeFormat(
+    "nb-NO",
+    {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit"
+    }
+  ).format(date);
 }
 
 function getRequiredStages(order) {
+
   if (Array.isArray(order.required_stages)) {
     return selectableStages.filter(stage =>
       order.required_stages.includes(stage)
     );
   }
 
-  // Gamle ordre med NULL fortsetter som før.
   return [...oldDefaultStages];
 }
 
@@ -692,13 +814,36 @@ function getActiveStages(order) {
   ];
 }
 
+function priorityClass(priority) {
+
+  if (priority === "Haster") {
+    return "priority-value-urgent";
+  }
+
+  if (priority === "Stopp/venter") {
+    return "priority-value-stop";
+  }
+
+  return "priority-value-normal";
+}
+
+/* =========================================================
+   STATUSVISNING
+========================================================= */
+
 function progressHTML(status, stages) {
-  const currentIndex = stages.indexOf(status);
+
+  const currentIndex =
+    stages.indexOf(status);
 
   return stages.map((stage, index) => {
+
     let cls = "progress-step";
 
-    if (currentIndex >= 0 && index < currentIndex) {
+    if (
+      currentIndex >= 0 &&
+      index < currentIndex
+    ) {
       cls += " done";
     }
 
@@ -706,13 +851,24 @@ function progressHTML(status, stages) {
       cls += " current";
     }
 
-    return `<div class="${cls}" title="${escapeHtml(stage)}"></div>`;
+    return `
+      <div
+        class="${cls}"
+        title="${escapeHtml(stage)}">
+      </div>
+    `;
+
   }).join("");
 }
 
 function statusButtonsHTML(status, stages) {
+
   return stages.map(stage => {
-    const active = stage === status ? " active" : "";
+
+    const active =
+      stage === status
+        ? " active"
+        : "";
 
     return `
       <button
@@ -721,18 +877,29 @@ function statusButtonsHTML(status, stages) {
         ${escapeHtml(stage)}
       </button>
     `;
+
   }).join("");
 }
 
+/* =========================================================
+   PRODUKSJONSLØP
+========================================================= */
+
 function stageSelectorHTML(requiredStages) {
+
   return `
     <div class="stage-selector">
+
       ${selectableStages.map((stage, index) => {
+
         const checked =
-          requiredStages.includes(stage) ? "checked" : "";
+          requiredStages.includes(stage)
+            ? "checked"
+            : "";
 
         return `
           <div class="stage-option">
+
             <input
               type="checkbox"
               id="stage-${index}"
@@ -743,9 +910,12 @@ function stageSelectorHTML(requiredStages) {
               <span class="stage-check"></span>
               ${escapeHtml(stage)}
             </label>
+
           </div>
         `;
+
       }).join("")}
+
     </div>
 
     <button
@@ -761,21 +931,30 @@ function stageSelectorHTML(requiredStages) {
   `;
 }
 
+/* =========================================================
+   ORDRELINJER
+========================================================= */
+
 function orderLinesHTML(lines) {
-  const filtered = Array.isArray(lines)
-    ? lines.filter(line =>
-        line.Beskrivelse ||
-        line.Produkt ||
-        Number(line.Nettobeløp) > 0
-      )
-    : [];
+
+  const filtered =
+    Array.isArray(lines)
+      ? lines.filter(line =>
+          line.Beskrivelse ||
+          line.Produkt ||
+          Number(line.Nettobeløp) > 0
+        )
+      : [];
 
   if (!filtered.length) {
-    return `<p>Ingen ordrelinjer registrert.</p>`;
+    return `
+      <p>Ingen ordrelinjer registrert.</p>
+    `;
   }
 
   return `
     <table class="lines">
+
       <thead>
         <tr>
           <th>Produkt</th>
@@ -784,43 +963,74 @@ function orderLinesHTML(lines) {
           <th>Enhet</th>
         </tr>
       </thead>
+
       <tbody>
+
         ${filtered.map(line => `
           <tr>
-            <td>${escapeHtml(line.Produkt || "-")}</td>
-            <td>${escapeHtml(line.Beskrivelse || "-")}</td>
-            <td>${escapeHtml(line.Antall ?? "-")}</td>
-            <td>${escapeHtml(line.Enhet || "-")}</td>
+            <td>
+              ${escapeHtml(line.Produkt || "-")}
+            </td>
+
+            <td>
+              ${escapeHtml(line.Beskrivelse || "-")}
+            </td>
+
+            <td>
+              ${escapeHtml(line.Antall ?? "-")}
+            </td>
+
+            <td>
+              ${escapeHtml(line.Enhet || "-")}
+            </td>
           </tr>
         `).join("")}
+
       </tbody>
+
     </table>
   `;
 }
 
+/* =========================================================
+   LAKKERING
+========================================================= */
+
 function photoRequirementHTML(photoStatus) {
-  const before = photoStatus?.has_before;
-  const after = photoStatus?.has_after;
+
+  const before =
+    photoStatus?.has_before;
+
+  const after =
+    photoStatus?.has_after;
 
   return `
     <div class="photo-requirements">
+
       <div class="requirement ${before ? "ok" : "missing"}">
-        ${before
-          ? "✓ Bilde før lakkering lagret"
-          : "⚠ Bilde før lakkering mangler"}
+        ${
+          before
+            ? "✓ Bilde før lakkering lagret"
+            : "⚠ Bilde før lakkering mangler"
+        }
       </div>
 
       <div class="requirement ${after ? "ok" : "missing"}">
-        ${after
-          ? "✓ Bilde etter lakkering lagret"
-          : "⚠ Bilde etter lakkering mangler"}
+        ${
+          after
+            ? "✓ Bilde etter lakkering lagret"
+            : "⚠ Bilde etter lakkering mangler"
+        }
       </div>
+
     </div>
   `;
 }
 
 function paintSectionHTML(order) {
-  const requiredStages = getRequiredStages(order);
+
+  const requiredStages =
+    getRequiredStages(order);
 
   if (!requiredStages.includes("Lakkering")) {
     return "";
@@ -828,21 +1038,28 @@ function paintSectionHTML(order) {
 
   return `
     <div class="card">
+
       <h2 class="section-title">
         Lakkering – bildedokumentasjon
       </h2>
 
       <p class="photo-intro">
-        Både før- og etterbilde må være lagret før ordren kan
-        flyttes videre til Pakking eller Ferdig.
+        Både før- og etterbilde må være lagret
+        før ordren kan flyttes videre til
+        Pakking eller Ferdig.
       </p>
 
       ${photoRequirementHTML(order.paint_photos)}
 
       <div class="photo-actions">
+
         <div class="photo-box">
+
           <h3>Før lakkering</h3>
-          <p>Dokumenter varen før den lakkeres.</p>
+
+          <p>
+            Dokumenter varen før den lakkeres.
+          </p>
 
           <input
             id="beforeFile"
@@ -857,11 +1074,16 @@ function paintSectionHTML(order) {
             onclick="selectPhoto('beforeFile')">
             📷 Ta bilde før lakkering
           </button>
+
         </div>
 
         <div class="photo-box">
+
           <h3>Etter lakkering</h3>
-          <p>Dokumenter ferdig lakkert vare.</p>
+
+          <p>
+            Dokumenter ferdig lakkert vare.
+          </p>
 
           <input
             id="afterFile"
@@ -876,7 +1098,9 @@ function paintSectionHTML(order) {
             onclick="selectPhoto('afterFile')">
             📷 Ta bilde etter lakkering
           </button>
+
         </div>
+
       </div>
 
       <div
@@ -888,59 +1112,109 @@ function paintSectionHTML(order) {
         <strong>Lagrede bilder</strong>
       </div>
 
-      <div id="gallery" class="gallery">
+      <div
+        id="gallery"
+        class="gallery">
         Laster bilder...
       </div>
+
     </div>
   `;
 }
 
+/* =========================================================
+   HENT OG VIS ORDRE
+========================================================= */
+
 async function loadOrder() {
-  const content = document.getElementById("content");
+
+  const content =
+    document.getElementById("content");
 
   if (!token) {
-    content.innerHTML =
-      `<div class="error-card">Mangler ordre-token i lenken.</div>`;
+
+    content.innerHTML = `
+      <div class="error-card">
+        Mangler ordre-token i lenken.
+      </div>
+    `;
+
     return;
   }
 
   try {
+
     const response = await fetch(
-      functionUrl + "?token=" + encodeURIComponent(token)
+      functionUrl +
+      "?token=" +
+      encodeURIComponent(token)
     );
 
-    if (!response.ok) throw new Error();
+    if (!response.ok) {
+      throw new Error();
+    }
 
-    const order = await response.json();
+    const order =
+      await response.json();
 
     currentOrder = order;
 
     const status =
-      order.production_status || "Ordre mottatt";
+      order.production_status ||
+      "Ordre mottatt";
 
-    const employee = getEmployeeName();
-    const requiredStages = getRequiredStages(order);
-    const activeStages = getActiveStages(order);
+    const priority =
+      order.priority ||
+      "Normal";
+
+    const employee =
+      getEmployeeName();
+
+    const requiredStages =
+      getRequiredStages(order);
+
+    const activeStages =
+      getActiveStages(order);
 
     content.innerHTML = `
+
       <div class="card user-card">
+
         <div class="user-row">
+
           <div>
-            <div class="user-label">Innlogget operatør</div>
+            <div class="user-label">
+              Innlogget operatør
+            </div>
+
             <div class="user-name">
-              ${employee ? escapeHtml(employee) : "Ikke valgt"}
+              ${
+                employee
+                  ? escapeHtml(employee)
+                  : "Ikke valgt"
+              }
             </div>
           </div>
 
           <button
             class="change-user"
             onclick="changeEmployee()">
-            ${employee ? "Bytt bruker" : "Velg navn"}
+
+            ${
+              employee
+                ? "Bytt bruker"
+                : "Velg navn"
+            }
+
           </button>
+
         </div>
+
       </div>
 
+
       <div class="card">
+
         <h1 class="order-title">
           Ordre #${escapeHtml(order.sales_order_no)}
         </h1>
@@ -950,47 +1224,137 @@ async function loadOrder() {
         </div>
 
         <div class="info-grid">
+
           <div class="info-box">
-            <span class="label">Prosjekt</span>
+            <span class="label">
+              Prosjekt
+            </span>
+
             <div class="value">
               ${escapeHtml(order.project_code || "-")}
             </div>
           </div>
 
           <div class="info-box">
-            <span class="label">Leveringsdato</span>
+            <span class="label">
+              Leveringsdato
+            </span>
+
             <div class="value">
               ${formatDate(order.delivery_date)}
             </div>
           </div>
 
           <div class="info-box">
-            <span class="label">Produksjonsstatus</span>
+            <span class="label">
+              Produksjonsstatus
+            </span>
+
             <div class="value">
               ${escapeHtml(status)}
             </div>
           </div>
+
+          <div class="info-box">
+            <span class="label">
+              Prioritet
+            </span>
+
+            <div class="value ${priorityClass(priority)}">
+              ${escapeHtml(priority)}
+            </div>
+          </div>
+
         </div>
+
       </div>
 
+
       <div class="card">
-        <h2 class="section-title">Produksjonsløp</h2>
+
+        <h2 class="section-title">
+          Prioritet
+        </h2>
 
         <p class="section-note">
-          Velg bare trinnene denne ordren faktisk skal gjennom.
-          Ordre mottatt og Ferdig legges til automatisk.
+          Velg hvordan denne ordren skal
+          prioriteres i produksjonen.
+        </p>
+
+        <div class="priority-selector">
+
+          <button
+            class="priority-button normal ${
+              priority === "Normal"
+                ? "active"
+                : ""
+            }"
+            onclick="savePriority('Normal')">
+            ✓ Normal
+          </button>
+
+          <button
+            class="priority-button urgent ${
+              priority === "Haster"
+                ? "active"
+                : ""
+            }"
+            onclick="savePriority('Haster')">
+            ⚡ Haster
+          </button>
+
+          <button
+            class="priority-button stop ${
+              priority === "Stopp/venter"
+                ? "active"
+                : ""
+            }"
+            onclick="savePriority('Stopp/venter')">
+            ⛔ Stopp / venter
+          </button>
+
+        </div>
+
+        <div
+          id="priorityMessage"
+          class="priority-message">
+        </div>
+
+      </div>
+
+
+      <div class="card">
+
+        <h2 class="section-title">
+          Produksjonsløp
+        </h2>
+
+        <p class="section-note">
+          Velg bare trinnene denne ordren
+          faktisk skal gjennom.
+          Ordre mottatt og Ferdig legges
+          til automatisk.
         </p>
 
         ${stageSelectorHTML(requiredStages)}
+
       </div>
 
-      <div class="card">
-        <h2 class="section-title">Produksjonsstatus</h2>
 
-        <div id="statusMessage" class="message"></div>
+      <div class="card">
+
+        <h2 class="section-title">
+          Produksjonsstatus
+        </h2>
+
+        <div
+          id="statusMessage"
+          class="message">
+        </div>
 
         <div class="current-status">
-          Nåværende status: ${escapeHtml(status)}
+          Nåværende status:
+          ${escapeHtml(status)}
         </div>
 
         <div class="progress">
@@ -1000,14 +1364,23 @@ async function loadOrder() {
         <div class="status-buttons">
           ${statusButtonsHTML(status, activeStages)}
         </div>
+
       </div>
 
+
       <div class="card">
-        <h2 class="section-title">Ordrelinjer</h2>
+
+        <h2 class="section-title">
+          Ordrelinjer
+        </h2>
+
         ${orderLinesHTML(order.order_lines)}
+
       </div>
 
+
       <div class="card">
+
         <h2 class="section-title">
           Produksjonshistorikk
         </h2>
@@ -1015,54 +1388,83 @@ async function loadOrder() {
         <div id="history">
           Laster historikk...
         </div>
+
       </div>
+
 
       ${paintSectionHTML(order)}
 
+
       <div class="card">
-        <h2 class="section-title">QR-kode</h2>
+
+        <h2 class="section-title">
+          QR-kode
+        </h2>
 
         <div class="qr-wrap">
+
           <img
             src="https://quickchart.io/qr?size=220&text=${encodeURIComponent(window.location.href)}"
             alt="QR-kode">
 
           <div class="qr-text">
-            <strong>Scan med mobilkamera</strong>
+
+            <strong>
+              Scan med mobilkamera
+            </strong>
 
             <p>
-              QR-koden åpner denne produksjonsordren direkte.
-              Den kan skrives ut og følge varen gjennom produksjonen.
+              QR-koden åpner denne
+              produksjonsordren direkte.
+              Den kan skrives ut og følge
+              varen gjennom produksjonen.
             </p>
+
           </div>
+
         </div>
+
       </div>
     `;
 
     loadHistory();
 
-    if (requiredStages.includes("Lakkering")) {
+    if (
+      requiredStages.includes("Lakkering")
+    ) {
       loadImages();
     }
 
   } catch (error) {
+
     console.error(error);
 
-    content.innerHTML =
-      `<div class="error-card">
+    content.innerHTML = `
+      <div class="error-card">
         Kunne ikke hente produksjonsordren.
-      </div>`;
+      </div>
+    `;
   }
 }
+
+/* =========================================================
+   LAGRE PRIORITET
+========================================================= */
+
 async function savePriority(priority) {
+
   const message =
-    document.getElementById("priorityMessage");
+    document.getElementById(
+      "priorityMessage"
+    );
 
   if (message) {
-    message.textContent = "Lagrer...";
+    message.textContent =
+      "Lagrer...";
   }
 
   try {
+
     const response = await fetch(
       functionUrl +
       "?token=" +
@@ -1070,11 +1472,14 @@ async function savePriority(priority) {
       "&action=priority",
       {
         method: "POST",
+
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type":
+            "application/json"
         },
+
         body: JSON.stringify({
-          priority: priority
+          priority
         })
       }
     );
@@ -1082,47 +1487,70 @@ async function savePriority(priority) {
     let result = null;
 
     try {
-      result = await response.json();
+      result =
+        await response.json();
     } catch {}
 
     if (!response.ok) {
       throw new Error(
-        result?.error || "Kunne ikke lagre prioriteten."
+        result?.error ||
+        "Kunne ikke lagre prioriteten."
       );
     }
 
     if (message) {
-      message.textContent = "✓ Prioriteten er lagret.";
+      message.textContent =
+        "✓ Prioriteten er lagret.";
     }
 
     setTimeout(() => {
       loadOrder();
-    }, 400);
+    }, 350);
 
   } catch (error) {
+
     console.error(error);
 
     if (message) {
       message.textContent =
         "⚠ " +
-        (error.message || "Kunne ikke lagre prioriteten.");
+        (
+          error.message ||
+          "Kunne ikke lagre prioriteten."
+        );
     }
   }
 }
+
+/* =========================================================
+   LAGRE PRODUKSJONSLØP
+========================================================= */
+
 async function saveRequiredStages() {
+
   const message =
-    document.getElementById("stageMessage");
+    document.getElementById(
+      "stageMessage"
+    );
 
-  const selected = selectableStages.filter((stage, index) => {
-    const checkbox =
-      document.getElementById(`stage-${index}`);
+  const selected =
+    selectableStages.filter(
+      (stage, index) => {
 
-    return checkbox?.checked;
-  });
+        const checkbox =
+          document.getElementById(
+            `stage-${index}`
+          );
 
-  message.textContent = "Lagrer...";
+        return checkbox?.checked;
+      }
+    );
+
+  message.textContent =
+    "Lagrer...";
 
   try {
+
     const response = await fetch(
       functionUrl +
       "?token=" +
@@ -1130,9 +1558,12 @@ async function saveRequiredStages() {
       "&action=stages",
       {
         method: "POST",
+
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type":
+            "application/json"
         },
+
         body: JSON.stringify({
           required_stages: selected
         })
@@ -1142,37 +1573,54 @@ async function saveRequiredStages() {
     let result = null;
 
     try {
-      result = await response.json();
+      result =
+        await response.json();
     } catch {}
 
     if (!response.ok) {
       throw new Error(
-        result?.error || "Kunne ikke lagre produksjonsløpet."
+        result?.error ||
+        "Kunne ikke lagre produksjonsløpet."
       );
     }
 
-    message.textContent = "✓ Produksjonsløpet er lagret.";
+    message.textContent =
+      "✓ Produksjonsløpet er lagret.";
 
     setTimeout(() => {
       loadOrder();
     }, 500);
 
   } catch (error) {
+
     console.error(error);
 
     message.textContent =
       "⚠ " +
-      (error.message || "Kunne ikke lagre produksjonsløpet.");
+      (
+        error.message ||
+        "Kunne ikke lagre produksjonsløpet."
+      );
   }
 }
 
-async function loadHistory() {
-  const historyBox =
-    document.getElementById("history");
+/* =========================================================
+   HISTORIKK
+========================================================= */
 
-  if (!historyBox) return;
+async function loadHistory() {
+
+  const historyBox =
+    document.getElementById(
+      "history"
+    );
+
+  if (!historyBox) {
+    return;
+  }
 
   try {
+
     const response = await fetch(
       functionUrl +
       "?token=" +
@@ -1180,92 +1628,148 @@ async function loadHistory() {
       "&action=history"
     );
 
-    if (!response.ok) throw new Error();
+    if (!response.ok) {
+      throw new Error();
+    }
 
-    const history = await response.json();
+    const history =
+      await response.json();
 
-    if (!Array.isArray(history) || !history.length) {
+    if (
+      !Array.isArray(history) ||
+      !history.length
+    ) {
+
       historyBox.innerHTML = `
         <div class="history-empty">
-          Ingen statusendringer er registrert ennå.
+          Ingen statusendringer
+          er registrert ennå.
         </div>
       `;
+
       return;
     }
 
     historyBox.innerHTML = `
+
       ${history.map(item => `
+
         <div class="history-item">
-          <div class="history-marker"></div>
+
+          <div class="history-marker">
+          </div>
 
           <div class="history-main">
+
             <div class="history-top">
+
               <div class="history-employee">
-                ${escapeHtml(item.employee_name || "Ukjent operatør")}
+                ${
+                  escapeHtml(
+                    item.employee_name ||
+                    "Ukjent operatør"
+                  )
+                }
               </div>
 
               <div class="history-time">
-                ${escapeHtml(formatHistoryDate(item.created_at))}
+                ${
+                  escapeHtml(
+                    formatHistoryDate(
+                      item.created_at
+                    )
+                  )
+                }
               </div>
+
             </div>
 
             <div class="history-change">
-              ${escapeHtml(item.previous_status || "-")}
-              <span class="history-arrow">→</span>
-              ${escapeHtml(item.status || "-")}
+
+              ${
+                escapeHtml(
+                  item.previous_status ||
+                  "-"
+                )
+              }
+
+              <span class="history-arrow">
+                →
+              </span>
+
+              ${
+                escapeHtml(
+                  item.status ||
+                  "-"
+                )
+              }
+
             </div>
+
           </div>
+
         </div>
+
       `).join("")}
+
     `;
 
   } catch {
+
     historyBox.innerHTML = `
       <div class="history-empty">
-        Kunne ikke hente produksjonshistorikken.
+        Kunne ikke hente
+        produksjonshistorikken.
       </div>
     `;
   }
 }
 
-function selectPhoto(inputId) {
-  const employee = ensureEmployeeName();
-
-  if (!employee) {
-    alert("Velg navn før du tar bilde.");
-    loadOrder();
-    return;
-  }
-
-  document.getElementById(inputId).click();
-}
+/* =========================================================
+   STATUSENDRING
+========================================================= */
 
 async function updateStatus(status) {
-  const message =
-    document.getElementById("statusMessage");
 
-  const employee = ensureEmployeeName();
+  const message =
+    document.getElementById(
+      "statusMessage"
+    );
+
+  const employee =
+    ensureEmployeeName();
 
   if (!employee) {
-    message.className = "message error";
+
+    message.className =
+      "message error";
+
     message.textContent =
       "⚠ Velg operatør før status endres.";
+
     return;
   }
 
-  message.className = "message";
-  message.textContent = "";
+  message.className =
+    "message";
+
+  message.textContent =
+    "";
 
   try {
+
     const response = await fetch(
       functionUrl +
       "?token=" +
       encodeURIComponent(token),
       {
         method: "POST",
+
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type":
+            "application/json"
         },
+
         body: JSON.stringify({
           status,
           employee_name: employee
@@ -1274,58 +1778,125 @@ async function updateStatus(status) {
     );
 
     if (!response.ok) {
+
       let errorText =
         "Kunne ikke oppdatere produksjonsstatus.";
 
       try {
-        const data = await response.json();
+
+        const data =
+          await response.json();
 
         if (data.error) {
-          errorText = data.error;
+          errorText =
+            data.error;
         }
+
       } catch {}
 
-      message.className = "message error";
-      message.textContent = "⚠ " + errorText;
+      message.className =
+        "message error";
+
+      message.textContent =
+        "⚠ " + errorText;
+
       return;
     }
 
     await loadOrder();
 
   } catch {
-    message.className = "message error";
+
+    message.className =
+      "message error";
+
     message.textContent =
       "⚠ Kunne ikke oppdatere produksjonsstatus.";
   }
 }
 
-async function uploadImage(imageType, input) {
-  const file = input.files?.[0];
+/* =========================================================
+   BILDER
+========================================================= */
 
-  const statusBox =
-    document.getElementById("uploadStatus");
+function selectPhoto(inputId) {
 
-  if (!file || !statusBox) return;
-
-  const employee = ensureEmployeeName();
+  const employee =
+    ensureEmployeeName();
 
   if (!employee) {
+
+    alert(
+      "Velg navn før du tar bilde."
+    );
+
+    loadOrder();
+
+    return;
+  }
+
+  document
+    .getElementById(inputId)
+    .click();
+}
+
+async function uploadImage(
+  imageType,
+  input
+) {
+
+  const file =
+    input.files?.[0];
+
+  const statusBox =
+    document.getElementById(
+      "uploadStatus"
+    );
+
+  if (!file || !statusBox) {
+    return;
+  }
+
+  const employee =
+    ensureEmployeeName();
+
+  if (!employee) {
+
     statusBox.textContent =
       "Velg navn før bildet kan lagres.";
 
     input.value = "";
+
     return;
   }
 
-  statusBox.textContent = "Laster opp bilde...";
+  statusBox.textContent =
+    "Laster opp bilde...";
 
   try {
-    const formData = new FormData();
 
-    formData.append("file", file);
-    formData.append("stage", "Lakkering");
-    formData.append("image_type", imageType);
-    formData.append("uploaded_by", employee);
+    const formData =
+      new FormData();
+
+    formData.append(
+      "file",
+      file
+    );
+
+    formData.append(
+      "stage",
+      "Lakkering"
+    );
+
+    formData.append(
+      "image_type",
+      imageType
+    );
+
+    formData.append(
+      "uploaded_by",
+      employee
+    );
 
     const response = await fetch(
       functionUrl +
@@ -1339,7 +1910,9 @@ async function uploadImage(imageType, input) {
     );
 
     if (!response.ok) {
-      throw new Error(await response.text());
+      throw new Error(
+        await response.text()
+      );
     }
 
     input.value = "";
@@ -1347,6 +1920,7 @@ async function uploadImage(imageType, input) {
     await loadOrder();
 
   } catch (error) {
+
     console.error(error);
 
     statusBox.textContent =
@@ -1355,12 +1929,18 @@ async function uploadImage(imageType, input) {
 }
 
 async function loadImages() {
-  const gallery =
-    document.getElementById("gallery");
 
-  if (!gallery) return;
+  const gallery =
+    document.getElementById(
+      "gallery"
+    );
+
+  if (!gallery) {
+    return;
+  }
 
   try {
+
     const response = await fetch(
       functionUrl +
       "?token=" +
@@ -1368,62 +1948,104 @@ async function loadImages() {
       "&action=images"
     );
 
-    if (!response.ok) throw new Error();
+    if (!response.ok) {
+      throw new Error();
+    }
 
-    const images = await response.json();
+    const images =
+      await response.json();
 
-    if (!Array.isArray(images) || !images.length) {
+    if (
+      !Array.isArray(images) ||
+      !images.length
+    ) {
+
       gallery.innerHTML =
-        `<div>Ingen bilder lagret ennå.</div>`;
+        `<div>
+          Ingen bilder lagret ennå.
+        </div>`;
+
       return;
     }
 
     gallery.innerHTML =
       images.map(image => {
+
         const typeText =
           image.image_type === "before"
             ? "Før lakkering"
             : "Etter lakkering";
 
         if (!image.image_url) {
+
           return `
             <div class="image-card">
+
               <div class="image-info">
-                <div class="image-type">${typeText}</div>
+
+                <div class="image-type">
+                  ${typeText}
+                </div>
+
                 Bildet kunne ikke vises.
+
               </div>
+
             </div>
           `;
         }
 
         return `
           <div class="image-card">
+
             <img
               src="${image.image_url}"
               alt="${typeText}">
 
             <div class="image-info">
+
               <div class="image-type">
                 ${typeText}
               </div>
 
-              ${escapeHtml(image.stage || "")}
+              ${
+                escapeHtml(
+                  image.stage ||
+                  ""
+                )
+              }
 
-              ${image.uploaded_by
-                ? `<br>📷 ${escapeHtml(image.uploaded_by)}`
-                : ""}
+              ${
+                image.uploaded_by
+                  ? `<br>📷 ${
+                      escapeHtml(
+                        image.uploaded_by
+                      )
+                    }`
+                  : ""
+              }
+
             </div>
+
           </div>
         `;
+
       }).join("");
 
   } catch {
-    gallery.innerHTML =
-      `<div>Kunne ikke hente bilder.</div>`;
+
+    gallery.innerHTML = `
+      <div>
+        Kunne ikke hente bilder.
+      </div>
+    `;
   }
 }
 
+/* START */
+
 loadOrder();
+
 </script>
 
 </body>
