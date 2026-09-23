@@ -9,6 +9,7 @@
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 
 <style>
+
 * {
   box-sizing: border-box;
 }
@@ -19,6 +20,8 @@ body {
   color: white;
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* HEADER */
 
 header {
   height: 90px;
@@ -61,6 +64,8 @@ header {
   margin-top: 3px;
 }
 
+/* HOVEDINNHOLD */
+
 main {
   padding: 22px 28px 30px;
 }
@@ -82,21 +87,66 @@ h1 {
   font-size: 14px;
 }
 
+/* ORDREGRID */
+
 .orders {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 15px;
 }
 
+/* ORDREKORT */
+
 .order {
+  position: relative;
   background: #1d2026;
   border: 1px solid #30343c;
   border-radius: 13px;
   overflow: hidden;
   display: grid;
   grid-template-columns: minmax(0, 1fr) 150px;
-  min-height: 190px;
+  min-height: 205px;
 }
+
+/* HASTER */
+
+.order.priority-urgent {
+  border: 2px solid #f5a623;
+  box-shadow: 0 0 18px rgba(245, 166, 35, .18);
+}
+
+/* STOPP */
+
+.order.priority-stop {
+  border: 2px solid #dc3545;
+  opacity: .82;
+}
+
+/* PRIORITETSBANNER */
+
+.priority-banner {
+  position: absolute;
+  top: 0;
+  right: 150px;
+  padding: 6px 12px;
+  border-radius: 0 0 0 8px;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .4px;
+  z-index: 2;
+}
+
+.priority-banner.urgent {
+  background: #f5a623;
+  color: #111;
+}
+
+.priority-banner.stop {
+  background: #dc3545;
+  color: white;
+}
+
+/* ORDREINNHOLD */
 
 .order-main {
   padding: 18px 20px;
@@ -128,6 +178,8 @@ h1 {
   text-overflow: ellipsis;
 }
 
+/* META */
+
 .meta {
   display: flex;
   gap: 20px;
@@ -149,6 +201,8 @@ h1 {
   font-weight: 800;
 }
 
+/* STATUS */
+
 .status {
   display: inline-block;
   background: #f5a623;
@@ -163,6 +217,8 @@ h1 {
   background: #198754;
   color: white;
 }
+
+/* FREMDRIFT */
 
 .progress {
   display: flex;
@@ -184,6 +240,8 @@ h1 {
 .progress-part.current {
   background: #f5a623;
 }
+
+/* QR */
 
 .qr-area {
   background: white;
@@ -214,6 +272,8 @@ h1 {
   text-align: center;
 }
 
+/* TOM / FEIL */
+
 .empty,
 .error {
   grid-column: 1 / -1;
@@ -229,24 +289,36 @@ h1 {
   color: #ff8a8a;
 }
 
+/* STORE TV-ER */
+
 @media (min-width: 1500px) {
+
   .orders {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns:
+      repeat(3, minmax(0, 1fr));
   }
+
 }
 
+/* SMÅ SKJERMER */
+
 @media (max-width: 900px) {
+
   .orders {
     grid-template-columns: 1fr;
   }
+
 }
+
 </style>
 </head>
 
 <body>
 
 <header>
+
   <div>
+
     <div class="logo">
       <span>MSM</span> PRODUKSJON
     </div>
@@ -254,34 +326,58 @@ h1 {
     <div class="subtitle">
       Martin Sveis og Mekaniske AS
     </div>
+
   </div>
 
   <div class="header-right">
-    <div id="clock" class="clock"></div>
-    <div id="updated" class="updated">
+
+    <div
+      id="clock"
+      class="clock">
+    </div>
+
+    <div
+      id="updated"
+      class="updated">
       Henter produksjonsplan...
     </div>
+
   </div>
+
 </header>
 
 <main>
 
   <div class="top-row">
-    <h1>Aktive produksjonsordre</h1>
 
-    <div id="orderCount" class="order-count">
+    <h1>
+      Aktive produksjonsordre
+    </h1>
+
+    <div
+      id="orderCount"
+      class="order-count">
     </div>
+
   </div>
 
-  <div id="orders" class="orders">
+  <div
+    id="orders"
+    class="orders">
+
     <div class="empty">
       Laster ordre...
     </div>
+
   </div>
 
 </main>
 
 <script>
+
+/* =========================================================
+   OPPSETT
+========================================================= */
 
 const functionUrl =
   "https://xhhahusvvvsuaypqwcar.supabase.co/functions/v1/production-order";
@@ -299,7 +395,12 @@ const defaultStages = [
   "Ferdig"
 ];
 
+/* =========================================================
+   HJELPEFUNKSJONER
+========================================================= */
+
 function escapeHtml(value) {
+
   return String(value ?? "")
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")
@@ -314,7 +415,8 @@ function formatDate(value) {
     return "-";
   }
 
-  const parts = value.split("-");
+  const parts =
+    value.split("-");
 
   if (parts.length !== 3) {
     return value;
@@ -323,9 +425,15 @@ function formatDate(value) {
   return `${parts[2]}.${parts[1]}.${parts[0]}`;
 }
 
+/* =========================================================
+   PRODUKSJONSLØP
+========================================================= */
+
 function getStages(order) {
 
-  if (Array.isArray(order.required_stages)) {
+  if (
+    Array.isArray(order.required_stages)
+  ) {
 
     return [
       "Ordre mottatt",
@@ -339,38 +447,52 @@ function getStages(order) {
 
 function progressHtml(order) {
 
-  const stages = getStages(order);
+  const stages =
+    getStages(order);
 
   const current =
     stages.indexOf(
-      order.production_status || "Ordre mottatt"
+      order.production_status ||
+      "Ordre mottatt"
     );
 
-  return stages.map((stage, index) => {
+  return stages.map(
+    (stage, index) => {
 
-    let css = "progress-part";
+      let css =
+        "progress-part";
 
-    if (current >= 0 && index < current) {
-      css += " done";
+      if (
+        current >= 0 &&
+        index < current
+      ) {
+        css += " done";
+      }
+
+      if (index === current) {
+        css += " current";
+      }
+
+      return `
+        <div
+          class="${css}"
+          title="${escapeHtml(stage)}">
+        </div>
+      `;
+
     }
-
-    if (index === current) {
-      css += " current";
-    }
-
-    return `
-      <div
-        class="${css}"
-        title="${escapeHtml(stage)}">
-      </div>
-    `;
-
-  }).join("");
+  ).join("");
 }
+
+/* =========================================================
+   BESKRIVELSE
+========================================================= */
 
 function getDescription(order) {
 
-  if (!Array.isArray(order.order_lines)) {
+  if (
+    !Array.isArray(order.order_lines)
+  ) {
     return "";
   }
 
@@ -388,6 +510,128 @@ function getDescription(order) {
     .join(" · ");
 }
 
+/* =========================================================
+   PRIORITERING
+========================================================= */
+
+function getPriority(order) {
+
+  if (
+    order.priority === "Haster" ||
+    order.priority === "Stopp/venter"
+  ) {
+    return order.priority;
+  }
+
+  return "Normal";
+}
+
+function priorityWeight(priority) {
+
+  if (priority === "Haster") {
+    return 0;
+  }
+
+  if (priority === "Normal") {
+    return 1;
+  }
+
+  if (priority === "Stopp/venter") {
+    return 2;
+  }
+
+  return 1;
+}
+
+function priorityCardClass(priority) {
+
+  if (priority === "Haster") {
+    return " priority-urgent";
+  }
+
+  if (priority === "Stopp/venter") {
+    return " priority-stop";
+  }
+
+  return "";
+}
+
+function priorityBanner(priority) {
+
+  if (priority === "Haster") {
+
+    return `
+      <div class="priority-banner urgent">
+        ⚡ HASTER
+      </div>
+    `;
+  }
+
+  if (priority === "Stopp/venter") {
+
+    return `
+      <div class="priority-banner stop">
+        ⛔ STOPP / VENTER
+      </div>
+    `;
+  }
+
+  return "";
+}
+
+/* =========================================================
+   SORTERING
+========================================================= */
+
+function sortOrders(a, b) {
+
+  const priorityA =
+    getPriority(a);
+
+  const priorityB =
+    getPriority(b);
+
+  const priorityDifference =
+    priorityWeight(priorityA) -
+    priorityWeight(priorityB);
+
+  /*
+    Prioritet bestemmer først.
+  */
+
+  if (priorityDifference !== 0) {
+    return priorityDifference;
+  }
+
+  /*
+    Innen samme prioritet kommer
+    tidligste leveringsdato først.
+  */
+
+  if (
+    !a.delivery_date &&
+    !b.delivery_date
+  ) {
+    return 0;
+  }
+
+  if (!a.delivery_date) {
+    return 1;
+  }
+
+  if (!b.delivery_date) {
+    return -1;
+  }
+
+  return a.delivery_date.localeCompare(
+    b.delivery_date
+  );
+}
+
+/* =========================================================
+   QR
+========================================================= */
+
 function createQR(element, url) {
 
   element.innerHTML = "";
@@ -396,14 +640,21 @@ function createQR(element, url) {
     text: url,
     width: 120,
     height: 120,
-    correctLevel: QRCode.CorrectLevel.M
+    correctLevel:
+      QRCode.CorrectLevel.M
   });
 }
+
+/* =========================================================
+   HENT ORDRE
+========================================================= */
 
 async function loadOrders() {
 
   const container =
-    document.getElementById("orders");
+    document.getElementById(
+      "orders"
+    );
 
   try {
 
@@ -418,39 +669,66 @@ async function loadOrders() {
       throw new Error();
     }
 
-    let orders = await response.json();
+    let orders =
+      await response.json();
 
     if (!Array.isArray(orders)) {
       throw new Error();
     }
 
     /*
-      Ferdige ordre fjernes fra TV-skjermen.
-      De ligger fortsatt i systemet.
+      Ferdige ordre vises ikke
+      på produksjonstavla.
     */
 
-    orders = orders.filter(order =>
-      order.production_status !== "Ferdig"
-    );
+    orders =
+      orders.filter(order =>
+        order.production_status !==
+        "Ferdig"
+      );
 
     /*
-      Tidligste leveringsdato først.
+      PRIORITERING:
+
+      1. Haster
+      2. Normal
+      3. Stopp/venter
+
+      Innen gruppene:
+      tidligste levering først.
     */
 
-    orders.sort((a, b) => {
+    orders.sort(sortOrders);
 
-      if (!a.delivery_date) return 1;
-      if (!b.delivery_date) return -1;
+    const urgentCount =
+      orders.filter(order =>
+        getPriority(order) ===
+        "Haster"
+      ).length;
 
-      return a.delivery_date.localeCompare(
-        b.delivery_date
-      );
-    });
+    const stopCount =
+      orders.filter(order =>
+        getPriority(order) ===
+        "Stopp/venter"
+      ).length;
+
+    let countText =
+      `${orders.length} aktive ordre`;
+
+    if (urgentCount > 0) {
+      countText +=
+        ` · ⚡ ${urgentCount} haster`;
+    }
+
+    if (stopCount > 0) {
+      countText +=
+        ` · ⛔ ${stopCount} venter`;
+    }
 
     document.getElementById(
       "orderCount"
     ).textContent =
-      `${orders.length} aktive ordre`;
+      countText;
 
     if (!orders.length) {
 
@@ -463,123 +741,167 @@ async function loadOrders() {
       return;
     }
 
+    /* =====================================================
+       BYGG ORDREKORT
+    ===================================================== */
+
     container.innerHTML =
-      orders.map((order, index) => {
+      orders.map(
+        (order, index) => {
 
-        const status =
-          order.production_status ||
-          "Ordre mottatt";
+          const status =
+            order.production_status ||
+            "Ordre mottatt";
 
-        const finished =
-          status === "Ferdig"
-            ? " finished"
-            : "";
+          const priority =
+            getPriority(order);
 
-        return `
-          <div class="order">
+          const finished =
+            status === "Ferdig"
+              ? " finished"
+              : "";
 
-            <div class="order-main">
+          const cardClass =
+            priorityCardClass(
+              priority
+            );
 
-              <div class="order-number">
-                Ordre #${escapeHtml(order.sales_order_no)}
-              </div>
+          return `
 
-              <div class="customer">
-                ${escapeHtml(
-                  order.customer_name || "-"
-                )}
-              </div>
+            <div class="order${cardClass}">
 
-              <div class="description">
-                ${escapeHtml(
-                  getDescription(order) ||
-                  "Produksjonsordre"
-                )}
-              </div>
+              ${priorityBanner(priority)}
 
-              <div class="meta">
+              <div class="order-main">
 
-                <div>
-                  <div class="meta-label">
-                    Status
-                  </div>
-
-                  <div class="status${finished}">
-                    ${escapeHtml(status)}
-                  </div>
+                <div class="order-number">
+                  Ordre #${escapeHtml(
+                    order.sales_order_no
+                  )}
                 </div>
 
-                <div>
-                  <div class="meta-label">
-                    Levering
-                  </div>
-
-                  <div class="meta-value">
-                    ${formatDate(
-                      order.delivery_date
-                    )}
-                  </div>
+                <div class="customer">
+                  ${escapeHtml(
+                    order.customer_name ||
+                    "-"
+                  )}
                 </div>
 
-                <div>
-                  <div class="meta-label">
-                    Prosjekt
+                <div class="description">
+                  ${escapeHtml(
+                    getDescription(order) ||
+                    "Produksjonsordre"
+                  )}
+                </div>
+
+                <div class="meta">
+
+                  <div>
+
+                    <div class="meta-label">
+                      Status
+                    </div>
+
+                    <div
+                      class="status${finished}">
+                      ${escapeHtml(status)}
+                    </div>
+
                   </div>
 
-                  <div class="meta-value">
-                    ${escapeHtml(
-                      order.project_code || "-"
-                    )}
+                  <div>
+
+                    <div class="meta-label">
+                      Levering
+                    </div>
+
+                    <div class="meta-value">
+                      ${formatDate(
+                        order.delivery_date
+                      )}
+                    </div>
+
                   </div>
+
+                  <div>
+
+                    <div class="meta-label">
+                      Prosjekt
+                    </div>
+
+                    <div class="meta-value">
+                      ${escapeHtml(
+                        order.project_code ||
+                        "-"
+                      )}
+                    </div>
+
+                  </div>
+
+                </div>
+
+                <div class="progress">
+                  ${progressHtml(order)}
                 </div>
 
               </div>
 
-              <div class="progress">
-                ${progressHtml(order)}
+
+              <div class="qr-area">
+
+                <div
+                  class="qr"
+                  id="qr-${index}">
+                </div>
+
+                <div class="scan-text">
+                  Scan for ordre
+                </div>
+
               </div>
 
             </div>
+          `;
 
-            <div class="qr-area">
+        }
+      ).join("");
 
-              <div
-                class="qr"
-                id="qr-${index}">
-              </div>
+    /* =====================================================
+       LAG QR-KODER
+    ===================================================== */
 
-              <div class="scan-text">
-                Scan for ordre
-              </div>
+    orders.forEach(
+      (order, index) => {
 
-            </div>
+        const qrElement =
+          document.getElementById(
+            `qr-${index}`
+          );
 
-          </div>
-        `;
+        if (!qrElement) {
+          return;
+        }
 
-      }).join("");
+        const url =
+          orderPage +
+          "?token=" +
+          encodeURIComponent(
+            order.portal_token
+          );
 
-    orders.forEach((order, index) => {
-
-      const qrElement =
-        document.getElementById(
-          `qr-${index}`
+        createQR(
+          qrElement,
+          url
         );
+      }
+    );
 
-      if (!qrElement) return;
+    /* =====================================================
+       SIST OPPDATERT
+    ===================================================== */
 
-      const url =
-        orderPage +
-        "?token=" +
-        encodeURIComponent(
-          order.portal_token
-        );
-
-      createQR(qrElement, url);
-
-    });
-
-    const now = new Date();
+    const now =
+      new Date();
 
     document.getElementById(
       "updated"
@@ -603,13 +925,17 @@ async function loadOrders() {
         Kunne ikke hente produksjonsordre.
       </div>
     `;
-
   }
 }
 
+/* =========================================================
+   KLOKKE
+========================================================= */
+
 function updateClock() {
 
-  const now = new Date();
+  const now =
+    new Date();
 
   document.getElementById(
     "clock"
@@ -623,6 +949,10 @@ function updateClock() {
     );
 }
 
+/* =========================================================
+   START
+========================================================= */
+
 updateClock();
 loadOrders();
 
@@ -632,8 +962,8 @@ setInterval(
 );
 
 /*
-  TV-skjermen oppdaterer produksjonen
-  automatisk hvert 30. sekund.
+  Produksjonstavla henter nye data
+  hvert 30. sekund.
 */
 
 setInterval(
