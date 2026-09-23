@@ -329,6 +329,60 @@ body {
   background: #f5a623;
 }
 
+/* NY STOR NESTE-STEG-KNAPP */
+
+.next-step-box {
+  background: #eef8f2;
+  border: 2px solid #198754;
+  border-radius: 12px;
+  padding: 18px;
+  margin: 18px 0;
+}
+
+.next-step-label {
+  color: #146c43;
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.next-step-button {
+  width: 100%;
+  border: 0;
+  background: #198754;
+  color: white;
+  padding: 20px 15px;
+  border-radius: 9px;
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: 900;
+  transition: .15s;
+}
+
+.next-step-button:hover {
+  filter: brightness(.94);
+}
+
+.next-step-finished {
+  background: #e8f5ee;
+  border-left: 5px solid #198754;
+  padding: 16px;
+  border-radius: 8px;
+  color: #146c43;
+  font-weight: 800;
+  margin: 18px 0;
+}
+
+.manual-status-title {
+  margin-top: 24px;
+  margin-bottom: 10px;
+  color: #6b7280;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
 .status-buttons {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -640,7 +694,13 @@ body {
   .history-time {
     margin-top: 3px;
   }
+
+  .next-step-button {
+    font-size: 17px;
+    padding: 20px 12px;
+  }
 }
+
 </style>
 </head>
 
@@ -882,6 +942,60 @@ function statusButtonsHTML(status, stages) {
 }
 
 /* =========================================================
+   NY: NESTE STEG
+========================================================= */
+
+function nextStepHTML(status, stages) {
+
+  const currentIndex =
+    stages.indexOf(status);
+
+  if (status === "Ferdig") {
+    return `
+      <div class="next-step-finished">
+        ✓ Ordren er ferdig
+      </div>
+    `;
+  }
+
+  if (
+    currentIndex < 0 ||
+    currentIndex >= stages.length - 1
+  ) {
+    return `
+      <div class="next-step-box">
+        <div class="next-step-label">
+          Neste steg
+        </div>
+        Kan ikke finne neste produksjonstrinn.
+      </div>
+    `;
+  }
+
+  const nextStatus =
+    stages[currentIndex + 1];
+
+  return `
+    <div class="next-step-box">
+
+      <div class="next-step-label">
+        Neste steg
+      </div>
+
+      <button
+        class="next-step-button"
+        onclick='updateStatus(${JSON.stringify(nextStatus)})'>
+
+        ✓ ${escapeHtml(status)}
+        ferdig → ${escapeHtml(nextStatus)}
+
+      </button>
+
+    </div>
+  `;
+}
+
+/* =========================================================
    PRODUKSJONSLØP
 ========================================================= */
 
@@ -968,6 +1082,7 @@ function orderLinesHTML(lines) {
 
         ${filtered.map(line => `
           <tr>
+
             <td>
               ${escapeHtml(line.Produkt || "-")}
             </td>
@@ -983,6 +1098,7 @@ function orderLinesHTML(lines) {
             <td>
               ${escapeHtml(line.Enhet || "-")}
             </td>
+
           </tr>
         `).join("")}
 
@@ -1183,6 +1299,7 @@ async function loadOrder() {
         <div class="user-row">
 
           <div>
+
             <div class="user-label">
               Innlogget operatør
             </div>
@@ -1194,6 +1311,7 @@ async function loadOrder() {
                   : "Ikke valgt"
               }
             </div>
+
           </div>
 
           <button
@@ -1226,6 +1344,7 @@ async function loadOrder() {
         <div class="info-grid">
 
           <div class="info-box">
+
             <span class="label">
               Prosjekt
             </span>
@@ -1233,9 +1352,11 @@ async function loadOrder() {
             <div class="value">
               ${escapeHtml(order.project_code || "-")}
             </div>
+
           </div>
 
           <div class="info-box">
+
             <span class="label">
               Leveringsdato
             </span>
@@ -1243,9 +1364,11 @@ async function loadOrder() {
             <div class="value">
               ${formatDate(order.delivery_date)}
             </div>
+
           </div>
 
           <div class="info-box">
+
             <span class="label">
               Produksjonsstatus
             </span>
@@ -1253,9 +1376,11 @@ async function loadOrder() {
             <div class="value">
               ${escapeHtml(status)}
             </div>
+
           </div>
 
           <div class="info-box">
+
             <span class="label">
               Prioritet
             </span>
@@ -1263,6 +1388,7 @@ async function loadOrder() {
             <div class="value ${priorityClass(priority)}">
               ${escapeHtml(priority)}
             </div>
+
           </div>
 
         </div>
@@ -1359,6 +1485,12 @@ async function loadOrder() {
 
         <div class="progress">
           ${progressHTML(status, activeStages)}
+        </div>
+
+        ${nextStepHTML(status, activeStages)}
+
+        <div class="manual-status-title">
+          Manuell statusendring
         </div>
 
         <div class="status-buttons">
