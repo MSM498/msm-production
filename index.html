@@ -1563,7 +1563,7 @@ async function loadDeviations() {
             </div>
           ` : ""}
 
-          ${open && isAdmin ? `
+          ${open ? `
             <button class="resolve-button" onclick="resolveDeviation(${Number(item.id)})">
               ✓ Marker som løst
             </button>
@@ -1578,8 +1578,6 @@ async function loadDeviations() {
 }
 
 async function resolveDeviation(id) {
-  if (!isAdmin) return;
-
   const employeeName =
     localStorage.getItem("msm_employee_name") || "";
 
@@ -1596,7 +1594,7 @@ async function resolveDeviation(id) {
       functionUrl + "?token=" + encodeURIComponent(token) + "&action=resolve-deviation",
       {
         method: "POST",
-        headers: adminHeaders({ "Content-Type": "application/json" }),
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           deviation_id: id,
           resolved_by: employeeName,
