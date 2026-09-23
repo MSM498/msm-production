@@ -1,1 +1,680 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MSM Må behandles</title>
 
+<style>
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  background: #111318;
+  color: #1f2937;
+}
+
+.topbar {
+  background: #0a0b0e;
+  border-bottom: 4px solid #f5a623;
+  padding: 20px;
+}
+
+.topbar-inner {
+  max-width: 1100px;
+  margin: auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.brand {
+  color: white;
+  font-size: 25px;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+.brand span { color: #f5a623; }
+
+.brand-small {
+  color: #9ca3af;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.badge {
+  background: #20232a;
+  color: #d1d5db;
+  padding: 8px 12px;
+  border-radius: 7px;
+  font-size: 11px;
+  font-weight: bold;
+}
+
+.container {
+  max-width: 1100px;
+  margin: auto;
+  padding: 22px;
+}
+
+.page-head {
+  color: white;
+  margin-bottom: 20px;
+}
+
+.page-head h1 {
+  margin: 0;
+  font-size: 30px;
+}
+
+.page-head p {
+  color: #9ca3af;
+  margin: 6px 0 0;
+}
+
+.login-box,
+.empty,
+.error {
+  background: white;
+  border-radius: 12px;
+  padding: 22px;
+}
+
+.login-box {
+  max-width: 420px;
+}
+
+.login-box h2 {
+  margin-top: 0;
+}
+
+.pin-row {
+  display: flex;
+  gap: 8px;
+}
+
+.pin-row input {
+  flex: 1;
+  padding: 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 16px;
+}
+
+button {
+  border: 0;
+  border-radius: 8px;
+  padding: 11px 15px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.btn-primary {
+  background: #f5a623;
+  color: #111318;
+}
+
+.btn-secondary {
+  background: #20232a;
+  color: white;
+}
+
+.toolbar {
+  display: none;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+  gap: 10px;
+}
+
+.counter {
+  color: white;
+  font-weight: 800;
+}
+
+.cases {
+  display: grid;
+  gap: 14px;
+}
+
+.case {
+  background: white;
+  border-radius: 12px;
+  padding: 18px;
+  box-shadow: 0 4px 15px rgba(0,0,0,.2);
+  border-left: 5px solid #f5a623;
+}
+
+.case.done {
+  border-left-color: #198754;
+  opacity: .78;
+}
+
+.case-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+  align-items: flex-start;
+}
+
+.case-title {
+  font-size: 19px;
+  font-weight: 800;
+}
+
+.case-from {
+  color: #6b7280;
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+.status {
+  white-space: nowrap;
+  padding: 8px 11px;
+  border-radius: 8px;
+  background: #fff4df;
+  color: #704d08;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.status.done {
+  background: #e8f5ee;
+  color: #146c43;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 14px 0;
+}
+
+.tag {
+  background: #f3f4f6;
+  border-radius: 7px;
+  padding: 7px 9px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.section {
+  margin-top: 14px;
+}
+
+.label {
+  display: block;
+  color: #6b7280;
+  font-size: 10px;
+  text-transform: uppercase;
+  font-weight: 800;
+  margin-bottom: 5px;
+}
+
+.text-box {
+  background: #f7f7f8;
+  border-radius: 8px;
+  padding: 12px;
+  white-space: pre-wrap;
+  line-height: 1.4;
+}
+
+.draft {
+  background: #fff8ea;
+  border-left: 4px solid #f5a623;
+}
+
+.date {
+  color: #6b7280;
+  font-size: 11px;
+  margin-top: 12px;
+}
+
+.footer {
+  text-align: center;
+  color: #6b7280;
+  font-size: 11px;
+  padding: 25px;
+}
+
+.hidden {
+  display: none !important;
+}
+
+@media (max-width: 750px) {
+  .container { padding: 12px; }
+  .badge { display: none; }
+
+  .case-top {
+    display: block;
+  }
+
+  .status {
+    display: inline-block;
+    margin-top: 10px;
+  }
+
+  .pin-row {
+    display: block;
+  }
+
+  .pin-row input,
+  .pin-row button {
+    width: 100%;
+    margin-bottom: 8px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div>
+      <div class="brand"><span>MSM</span> PRODUKSJON</div>
+      <div class="brand-small">Martin Sveis og Mekaniske AS</div>
+    </div>
+
+    <div class="badge">MÅ BEHANDLES</div>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="page-head">
+    <h1>Må behandles</h1>
+    <p>Kundehenvendelser og bestillinger som krever oppfølging</p>
+  </div>
+
+  <div id="loginBox" class="login-box">
+    <h2>Admin</h2>
+    <p>Skriv inn admin-PIN for å åpne e-postoversikten.</p>
+
+    <div class="pin-row">
+      <input
+        id="pin"
+        type="password"
+        inputmode="numeric"
+        placeholder="PIN-kode"
+        autocomplete="current-password"
+      >
+
+      <button
+        class="btn-primary"
+        onclick="login()">
+        Logg inn
+      </button>
+    </div>
+
+    <div id="loginError"
+         style="color:#b42318;margin-top:10px;"></div>
+  </div>
+
+  <div id="toolbar" class="toolbar">
+    <div id="counter" class="counter"></div>
+
+    <button
+      class="btn-secondary"
+      onclick="logout()">
+      Logg ut
+    </button>
+  </div>
+
+  <div id="cases" class="cases hidden"></div>
+
+</div>
+
+<div class="footer">
+  MSM Produksjonssystem
+</div>
+
+<script>
+
+const functionUrl =
+  "https://xhhahusvvvsuaypqwcar.supabase.co/functions/v1/production-order";
+
+let adminToken =
+  sessionStorage.getItem("msm_admin_token") || "";
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function formatDate(value) {
+  if (!value) return "-";
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+
+  return date.toLocaleString("nb-NO", {
+    dateStyle: "short",
+    timeStyle: "short"
+  });
+}
+
+async function login() {
+
+  const pin =
+    document.getElementById("pin").value.trim();
+
+  const errorBox =
+    document.getElementById("loginError");
+
+  errorBox.textContent = "";
+
+  if (!pin) {
+    errorBox.textContent = "Skriv inn PIN-koden.";
+    return;
+  }
+
+  try {
+
+    const response = await fetch(
+      functionUrl + "?action=admin-login",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ pin })
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok || !data.admin_token) {
+      throw new Error(
+        data.error || "Innlogging feilet"
+      );
+    }
+
+    adminToken = data.admin_token;
+
+    sessionStorage.setItem(
+      "msm_admin_token",
+      adminToken
+    );
+
+    document.getElementById("pin").value = "";
+
+    await loadCases();
+
+  } catch (error) {
+
+    errorBox.textContent =
+      error.message || "Innlogging feilet.";
+  }
+}
+
+async function logout() {
+
+  adminToken = "";
+
+  sessionStorage.removeItem(
+    "msm_admin_token"
+  );
+
+  showLogin();
+}
+
+function showLogin() {
+
+  document
+    .getElementById("loginBox")
+    .classList.remove("hidden");
+
+  document
+    .getElementById("toolbar")
+    .style.display = "none";
+
+  document
+    .getElementById("cases")
+    .classList.add("hidden");
+}
+
+function showCases() {
+
+  document
+    .getElementById("loginBox")
+    .classList.add("hidden");
+
+  document
+    .getElementById("toolbar")
+    .style.display = "flex";
+
+  document
+    .getElementById("cases")
+    .classList.remove("hidden");
+}
+
+async function checkAdmin() {
+
+  if (!adminToken) {
+    showLogin();
+    return;
+  }
+
+  try {
+
+    const response = await fetch(
+      functionUrl + "?action=admin-check",
+      {
+        headers: {
+          "x-msm-admin-token": adminToken
+        }
+      }
+    );
+
+    const data = await response.json();
+
+    if (!data.admin) {
+      logout();
+      return;
+    }
+
+    await loadCases();
+
+  } catch {
+    showLogin();
+  }
+}
+
+async function loadCases() {
+
+  const container =
+    document.getElementById("cases");
+
+  try {
+
+    const response = await fetch(
+      functionUrl + "?view=email-cases",
+      {
+        headers: {
+          "x-msm-admin-token": adminToken
+        }
+      }
+    );
+
+    if (response.status === 401) {
+      logout();
+      return;
+    }
+
+    if (!response.ok) {
+      throw new Error(
+        "Kunne ikke hente e-postsakene"
+      );
+    }
+
+    const cases = await response.json();
+
+    showCases();
+
+    if (!Array.isArray(cases)) {
+      throw new Error("Ugyldig svar fra server");
+    }
+
+    const openCases =
+      cases.filter(item =>
+        item.status === "Må behandles"
+      );
+
+    document.getElementById("counter")
+      .textContent =
+        `${openCases.length} må behandles`;
+
+    if (cases.length === 0) {
+      container.innerHTML =
+        '<div class="empty">Ingen e-postsaker.</div>';
+      return;
+    }
+
+    container.innerHTML =
+      cases.map(item => {
+
+        const done =
+          item.status === "Behandlet";
+
+        const tags = [];
+
+        if (item.case_type) {
+          tags.push(
+            `<span class="tag">${escapeHtml(item.case_type)}</span>`
+          );
+        }
+
+        if (item.product) {
+          tags.push(
+            `<span class="tag">Produkt: ${escapeHtml(item.product)}</span>`
+          );
+        }
+
+        if (item.quantity !== null &&
+            item.quantity !== undefined) {
+          tags.push(
+            `<span class="tag">Antall: ${escapeHtml(item.quantity)}</span>`
+          );
+        }
+
+        if (item.surface_treatment) {
+          tags.push(
+            `<span class="tag">Overflate: ${escapeHtml(item.surface_treatment)}</span>`
+          );
+        }
+
+        if (item.ral) {
+          tags.push(
+            `<span class="tag">RAL ${escapeHtml(item.ral)}</span>`
+          );
+        }
+
+        if (item.project) {
+          tags.push(
+            `<span class="tag">Prosjekt: ${escapeHtml(item.project)}</span>`
+          );
+        }
+
+        if (item.requested_delivery_date) {
+          tags.push(
+            `<span class="tag">Ønsket levering: ${escapeHtml(item.requested_delivery_date)}</span>`
+          );
+        }
+
+        return `
+          <div class="case ${done ? "done" : ""}">
+
+            <div class="case-top">
+              <div>
+                <div class="case-title">
+                  ${escapeHtml(item.subject || "(uten emne)")}
+                </div>
+
+                <div class="case-from">
+                  ${escapeHtml(item.sender || "-")}
+                </div>
+              </div>
+
+              <div class="status ${done ? "done" : ""}">
+                ${escapeHtml(item.status || "-")}
+              </div>
+            </div>
+
+            <div class="meta">
+              ${tags.join("")}
+            </div>
+
+            <div class="section">
+              <span class="label">E-post</span>
+              <div class="text-box">
+                ${escapeHtml(item.body || "-")}
+              </div>
+            </div>
+
+            <div class="section">
+              <span class="label">AI svarforslag</span>
+              <div class="text-box draft">
+                ${escapeHtml(item.draft_reply || "-")}
+              </div>
+            </div>
+
+            <div class="date">
+              Mottatt: ${escapeHtml(formatDate(item.created_at))}
+              ${
+                done && item.handled_at
+                  ? ` · Behandlet: ${escapeHtml(formatDate(item.handled_at))}`
+                  : ""
+              }
+              ${
+                done && item.handled_by
+                  ? ` · Av: ${escapeHtml(item.handled_by)}`
+                  : ""
+              }
+            </div>
+
+          </div>
+        `;
+      }).join("");
+
+  } catch (error) {
+
+    showCases();
+
+    container.innerHTML =
+      '<div class="error">Kunne ikke hente e-postoversikten.</div>';
+  }
+}
+
+document
+  .getElementById("pin")
+  .addEventListener(
+    "keydown",
+    event => {
+      if (event.key === "Enter") {
+        login();
+      }
+    }
+  );
+
+checkAdmin();
+
+setInterval(() => {
+  if (adminToken) {
+    loadCases();
+  }
+}, 30000);
+
+</script>
+
+</body>
+</html>
