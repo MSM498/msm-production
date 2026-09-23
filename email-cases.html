@@ -416,7 +416,9 @@ async function login() {
       error.message || "Innlogging feilet.";
   }
 }
-
+function startOrder(id) {
+  alert("Ordreforslag for e-postsak #" + id + " kommer her.");
+}
 async function logout() {
 
   adminToken = "";
@@ -627,7 +629,19 @@ async function loadCases() {
                 ${escapeHtml(item.draft_reply || "-")}
               </div>
             </div>
-
+<div class="section">
+  ${
+    !done
+      ? `
+        <button
+          class="btn-primary"
+          onclick="startOrder(${item.id})">
+          Opprett ordre
+        </button>
+      `
+      : ""
+  }
+</div>
             <div class="date">
               Mottatt: ${escapeHtml(formatDate(item.created_at))}
               ${
