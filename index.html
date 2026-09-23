@@ -648,6 +648,98 @@ body {
   padding: 25px;
 }
 
+
+/* ADMIN */
+
+.admin-top-button {
+  border: 1px solid #4b5563;
+  background: #20232a;
+  color: white;
+  padding: 9px 13px;
+  border-radius: 7px;
+  cursor: pointer;
+  font-weight: 800;
+  margin-left: 10px;
+}
+
+.admin-top-button.active {
+  background: #f5a623;
+  border-color: #f5a623;
+  color: #111;
+}
+
+.admin-login-box {
+  max-width: 420px;
+}
+
+.admin-pin-input {
+  width: 100%;
+  border: 2px solid #d1d5db;
+  border-radius: 8px;
+  padding: 14px;
+  font-size: 18px;
+  margin: 8px 0 12px;
+}
+
+.admin-pin-input:focus {
+  outline: none;
+  border-color: #f5a623;
+}
+
+.admin-login-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.admin-login-button {
+  border: 0;
+  background: #f5a623;
+  color: #111;
+  padding: 12px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 900;
+}
+
+.admin-cancel-button {
+  border: 1px solid #d1d5db;
+  background: white;
+  color: #374151;
+  padding: 12px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.admin-message {
+  margin-top: 12px;
+  font-weight: bold;
+  color: #a61b1b;
+}
+
+.admin-mode-card {
+  background: #fff4df;
+  border: 2px solid #f5a623;
+}
+
+.admin-mode-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+}
+
+.admin-mode-title {
+  font-weight: 900;
+  font-size: 18px;
+}
+
+.admin-mode-note {
+  color: #6b7280;
+  font-size: 13px;
+  margin-top: 4px;
+}
+
 /* MOBIL */
 
 @media (max-width: 700px) {
@@ -719,8 +811,17 @@ body {
       </div>
     </div>
 
-    <div class="badge">
-      PRODUKSJONSORDRE
+    <div>
+      <span class="badge">
+        PRODUKSJONSORDRE
+      </span>
+
+      <button
+        id="adminTopButton"
+        class="admin-top-button"
+        onclick="handleAdminButton()">
+        Admin
+      </button>
     </div>
 
   </div>
@@ -765,6 +866,247 @@ const token =
   params.get("token");
 
 let currentOrder = null;
+
+let isAdmin = false;
+
+function getAdminToken() {
+  return sessionStorage.getItem("msm_admin_token") || "";
+}
+
+function setAdminToken(value) {
+  if (value) {
+    sessionStorage.setItem("msm_admin_token", value);
+  } else {
+    sessionStorage.removeItem("msm_admin_token");
+  }
+}
+
+function adminHeaders(extra = {}) {
+  const adminToken = getAdminToken();
+
+  return {
+    ...extra,
+    ...(adminToken
+      ? { "x-msm-admin-token": adminToken }
+      : {})
+  };
+}
+
+function updateAdminTopButton() {
+  const button = document.getElementById("adminTopButton");
+
+  if (!button) return;
+
+  button.textContent = isAdmin ? "Admin ✓" : "Admin";
+  button.classList.toggle("active", isAdmin);
+}
+
+async function checkAdminSession() {
+  const adminToken = getAdminToken();
+
+  if (!adminToken) {
+    isAdmin = false;
+    updateAdminTopButton();
+    return false;
+  }
+
+  try {
+    const response = await fetch(
+      functionUrl + "?action=admin-check",
+      {
+        headers: adminHeaders()
+      }
+    );
+
+    const result = await response.json();
+
+    isAdmin = response.ok && result.admin === true;
+
+    if (!isAdmin) {
+      setAdminToken("");
+    }
+  } catch {
+    isAdmin = false;
+    setAdminToken("");
+  }
+
+  updateAdminTopButton();
+  return isAdmin;
+}
+
+function handleAdminButton() {
+  if (isAdmin) {
+    logoutAdmin();
+    return;
+  }
+
+  showAdminLogin();
+}
+
+function showAdminLogin() {
+  const content = document.getElementById("content");
+
+  content.innerHTML = `
+    <div class="card admin-login-box">
+
+      <h2 class="section-title">
+        Admin
+      </h2>
+
+      <p class="section-note">
+        Skriv admin-PIN for å åpne prioritet,
+        produksjonsløp og manuell statusendring.
+      </p>
+
+      <input
+        id="adminPin"
+        class="admin-pin-input"
+        type="password"
+        inputmode="numeric"
+        autocomplete="current-password"
+        placeholder="PIN"
+        onkeydown="if(event.key === 'Enter') loginAdmin()">
+
+      <div class="admin-login-actions">
+
+        <button
+          class="admin-login-button"
+          onclick="loginAdmin()">
+          Logg inn
+        </button>
+
+        <button
+          class="admin-cancel-button"
+          onclick="loadOrder()">
+          Avbryt
+        </button>
+
+      </div>
+
+      <div
+        id="adminMessage"
+        class="admin-message">
+      </div>
+
+    </div>
+  `;
+
+  setTimeout(() => {
+    document.getElementById("adminPin")?.focus();
+  }, 50);
+}
+
+async function loginAdmin() {
+  const pinInput = document.getElementById("adminPin");
+  const message = document.getElementById("adminMessage");
+  const pin = pinInput?.value?.trim() || "";
+
+  if (!pin) {
+    if (message) {
+      message.textContent = "Skriv PIN-koden.";
+    }
+    return;
+  }
+
+  if (message) {
+    message.textContent = "Sjekker PIN...";
+  }
+
+  try {
+    const response = await fetch(
+      functionUrl + "?action=admin-login",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ pin })
+      }
+    );
+
+    let result = null;
+
+    try {
+      result = await response.json();
+    } catch {}
+
+    if (!response.ok || !result?.admin_token) {
+      throw new Error(
+        result?.error || "Kunne ikke logge inn."
+      );
+    }
+
+    setAdminToken(result.admin_token);
+    isAdmin = true;
+    updateAdminTopButton();
+    await loadOrder();
+
+  } catch (error) {
+    if (message) {
+      message.textContent =
+        "⚠ " + (error.message || "Feil PIN-kode.");
+    }
+
+    if (pinInput) {
+      pinInput.value = "";
+      pinInput.focus();
+    }
+  }
+}
+
+async function logoutAdmin() {
+  const adminToken = getAdminToken();
+
+  if (adminToken) {
+    try {
+      await fetch(
+        functionUrl + "?action=admin-logout",
+        {
+          method: "POST",
+          headers: adminHeaders()
+        }
+      );
+    } catch {}
+  }
+
+  setAdminToken("");
+  isAdmin = false;
+  updateAdminTopButton();
+  await loadOrder();
+}
+
+function adminModeHTML() {
+  if (!isAdmin) return "";
+
+  return `
+    <div class="card admin-mode-card">
+
+      <div class="admin-mode-row">
+
+        <div>
+          <div class="admin-mode-title">
+            🔒 Adminvisning
+          </div>
+
+          <div class="admin-mode-note">
+            Prioritet, produksjonsløp og
+            manuell statusendring er tilgjengelig.
+          </div>
+        </div>
+
+        <button
+          class="change-user"
+          style="color:#111;border-color:#d49a2c"
+          onclick="logoutAdmin()">
+          Avslutt admin
+        </button>
+
+      </div>
+
+    </div>
+  `;
+}
+
 
 /* =========================================================
    HJELPEFUNKSJONER
@@ -1330,6 +1672,7 @@ async function loadOrder() {
 
       </div>
 
+      ${adminModeHTML()}
 
       <div class="card">
 
@@ -1395,6 +1738,8 @@ async function loadOrder() {
 
       </div>
 
+
+      ${isAdmin ? `
 
       <div class="card">
 
@@ -1467,6 +1812,8 @@ async function loadOrder() {
       </div>
 
 
+      ` : ""}
+
       <div class="card">
 
         <h2 class="section-title">
@@ -1489,13 +1836,15 @@ async function loadOrder() {
 
         ${nextStepHTML(status, activeStages)}
 
-        <div class="manual-status-title">
-          Manuell statusendring
-        </div>
+        ${isAdmin ? `
+          <div class="manual-status-title">
+            Manuell statusendring
+          </div>
 
-        <div class="status-buttons">
-          ${statusButtonsHTML(status, activeStages)}
-        </div>
+          <div class="status-buttons">
+            ${statusButtonsHTML(status, activeStages)}
+          </div>
+        ` : ""}
 
       </div>
 
@@ -1536,7 +1885,9 @@ async function loadOrder() {
         <div class="qr-wrap">
 
           <img
-            src="https://quickchart.io/qr?size=220&text=${encodeURIComponent(window.location.href)}"
+            src="https://quickchart.io/qr?size=220&text=${encodeURIComponent(
+              `${window.location.origin}${window.location.pathname}?token=${encodeURIComponent(token)}`
+            )}"
             alt="QR-kode">
 
           <div class="qr-text">
@@ -1605,10 +1956,10 @@ async function savePriority(priority) {
       {
         method: "POST",
 
-        headers: {
+        headers: adminHeaders({
           "Content-Type":
             "application/json"
-        },
+        }),
 
         body: JSON.stringify({
           priority
@@ -1691,10 +2042,10 @@ async function saveRequiredStages() {
       {
         method: "POST",
 
-        headers: {
+        headers: adminHeaders({
           "Content-Type":
             "application/json"
-        },
+        }),
 
         body: JSON.stringify({
           required_stages: selected
@@ -2176,7 +2527,10 @@ async function loadImages() {
 
 /* START */
 
-loadOrder();
+(async function startApp() {
+  await checkAdminSession();
+  await loadOrder();
+})();
 
 </script>
 
