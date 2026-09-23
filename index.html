@@ -405,6 +405,52 @@ body {
   color: #111;
 }
 
+/* ARBEIDSGRUNNLAG FRA POWEROFFICE */
+
+.work-basis {
+  border-left: 5px solid #f5a623;
+}
+
+.work-basis-intro {
+  background: #fff4df;
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-bottom: 16px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.work-line {
+  background: #f5f6f8;
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 10px;
+}
+
+.work-line:last-child {
+  margin-bottom: 0;
+}
+
+.work-line-title {
+  font-size: 18px;
+  font-weight: 900;
+  margin-bottom: 7px;
+}
+
+.work-line-meta {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+  color: #4b5563;
+  font-size: 14px;
+}
+
+.work-line-description {
+  margin-top: 9px;
+  white-space: pre-wrap;
+  line-height: 1.45;
+}
+
 /* ORDRELINJER */
 
 .lines {
@@ -1677,55 +1723,60 @@ function orderLinesHTML(lines) {
       ? lines.filter(line =>
           line.Beskrivelse ||
           line.Produkt ||
-          Number(line.Nettobeløp) > 0
+          Number(line.Antall) > 0
         )
       : [];
 
   if (!filtered.length) {
     return `
-      <p>Ingen ordrelinjer registrert.</p>
+      <p>Ingen produksjonsinformasjon er registrert på ordrelinjene i PowerOffice.</p>
     `;
   }
 
   return `
-    <table class="lines">
+    <div class="work-basis-intro">
+      Dette arbeidsgrunnlaget hentes automatisk fra PowerOffice.
+      Endringer på ordren kommer inn ved neste synkronisering.
+    </div>
 
-      <thead>
-        <tr>
-          <th>Produkt</th>
-          <th>Beskrivelse</th>
-          <th>Antall</th>
-          <th>Enhet</th>
-        </tr>
-      </thead>
+    ${filtered.map((line, index) => {
 
-      <tbody>
+      const product =
+        line.Produkt || `Linje ${index + 1}`;
 
-        ${filtered.map(line => `
-          <tr>
+      const description =
+        line.Beskrivelse || "";
 
-            <td>
-              ${escapeHtml(line.Produkt || "-")}
-            </td>
+      const quantity =
+        line.Antall ?? "-";
 
-            <td>
-              ${escapeHtml(line.Beskrivelse || "-")}
-            </td>
+      const unit =
+        line.Enhet || "";
 
-            <td>
-              ${escapeHtml(line.Antall ?? "-")}
-            </td>
+      return `
+        <div class="work-line">
 
-            <td>
-              ${escapeHtml(line.Enhet || "-")}
-            </td>
+          <div class="work-line-title">
+            ${escapeHtml(product)}
+          </div>
 
-          </tr>
-        `).join("")}
+          <div class="work-line-meta">
+            <span>
+              <strong>Antall:</strong>
+              ${escapeHtml(quantity)}
+              ${unit ? escapeHtml(unit) : ""}
+            </span>
+          </div>
 
-      </tbody>
+          ${description ? `
+            <div class="work-line-description">
+              ${escapeHtml(description)}
+            </div>
+          ` : ""}
 
-    </table>
+        </div>
+      `;
+    }).join("")}
   `;
 }
 
@@ -2130,10 +2181,10 @@ async function loadOrder() {
       </div>
 
 
-      <div class="card">
+      <div class="card work-basis">
 
         <h2 class="section-title">
-          Ordrelinjer
+          Arbeidsgrunnlag
         </h2>
 
         ${orderLinesHTML(order.order_lines)}
